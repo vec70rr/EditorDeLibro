@@ -1,4 +1,4 @@
-// Inicialización
+// Inicialización.
 document.addEventListener('DOMContentLoaded', async () => {
   // --- Referencias a elementos del DOM (sin cambios) ---
   const tocList = document.getElementById('tocList');
