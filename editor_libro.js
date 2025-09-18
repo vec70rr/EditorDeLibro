@@ -70,6 +70,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   async function renderLibro() {
+    // --- ¡CAMBIO IMPORTANTE! SECCIÓN DE ESTILOS ACTUALIZADA ---
     let completeHTML = `
       <!DOCTYPE html>
       <html lang="es">
@@ -80,28 +81,67 @@ document.addEventListener('DOMContentLoaded', async () => {
           <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
           <script src="https://unpkg.com/mathjs@latest/lib/browser/math.js"></script>
           <style>
-            body { font-family: 'Roboto', Arial, sans-serif; line-height: 1.6; margin: 0; background-color: #e8f0fe; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 20px; box-sizing: border-box; }
-            .container { background-color: #ffffff; border-radius: 8px; box-shadow: 0 1px 3px rgba(60,64,67,.3), 0 4px 8px rgba(60,64,67,.15); padding: 40px; max-width: 900px; width: 100%; box-sizing: border-box; }
-            h1, h2, h3, h4, h5 { color: #235f95; margin-top: 1.5em; margin-bottom: 0.8em; }
-            h1 { font-size: 2.2em; border-bottom: 2px solid #e8f0fe; padding-bottom: 10px; }
-            h2 { font-size: 1.8em; }
-            h3 { font-size: 1.5em; }
-            h4 { font-size: 1.3em; }
-            h5 { font-size: 1.1em; }
-            p { margin: 0.8em 0; color: #3c4043; }
-            .simulador-box { background: #f6fafd; border: 1px solid #d9e1f2; border-radius: 7px; padding: 15px; margin: 20px 0; }
-            .simulador-box input[type="text"], .simulador-box input[type="number"] { border: 1px solid #ccc; border-radius: 4px; padding: 8px; }
-            .simulador-box button { background-color: #235f95; color: white; border: none; border-radius: 4px; padding: 8px 15px; cursor: pointer; transition: background-color 0.2s; }
-            .simulador-box button:hover { background-color: #1a4a72; }
-            .equation { margin: 15px 0; text-align: center; background-color: #f8f9fa; padding: 10px; border-radius: 5px; }
-            img { max-width: 100%; height: auto; display: block; margin: 15px auto; border-radius: 5px; box-shadow: 0 1px 2px rgba(0,0,0,.1); }
+            :root {
+              --primary-color: #004080;
+              --primary-gradient: linear-gradient(135deg, #0059b3, #003366);
+              --secondary-gradient: linear-gradient(135deg, #e60000, #900000);
+              --text-color: #333;
+              --background-color: #f4f4f4;
+            }
+            body {
+              font-family: "Segoe UI", Arial, sans-serif;
+              background: var(--background-color);
+              color: var(--text-color);
+              margin: 0;
+              padding: 2rem;
+              line-height: 1.6;
+            }
+            .libro-container {
+              background: #ffffff;
+              max-width: 900px;
+              margin: 0 auto;
+              padding: 2rem 3rem;
+              border-radius: 8px;
+              box-shadow: 0 0 12px rgba(0,0,0,0.15);
+            }
+            h1, h2, h3, h4, h5 {
+              color: var(--primary-color);
+            }
+            h1 { border-left: 5px solid var(--primary-color); padding-left: 0.5rem; margin-top: 0; }
+            h2 { border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; margin-top: 1.5rem; }
+            .equation { margin: 15px 0; text-align: center; }
+            img { max-width: 100%; height: auto; display: block; margin: 15px auto; border-radius: 5px; }
             .error { color: red; font-weight: bold; }
-            .MJX-TEX { font-size: 1.1em; }
-            @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+            .btn-sim {
+              background: var(--primary-gradient);
+              color: white;
+              font-family: "Segoe UI", Arial, sans-serif;
+              font-size: 16px;
+              font-weight: bold;
+              border: none;
+              border-radius: 6px;
+              padding: 10px 18px;
+              cursor: pointer;
+              box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+              transition: background 0.3s ease, transform 0.2s ease;
+              margin-top: 10px;
+            }
+            .btn-sim:hover { background: #003366; transform: scale(1.02); }
+            .btn-sim-rojo { background: var(--secondary-gradient) !important; }
+            .btn-sim-rojo:hover { background: #900000 !important; }
+            .simulador-box {
+              background: #f9f9f9;
+              border-left: 5px solid var(--primary-color);
+              padding: 1rem;
+              margin: 1.2rem 0;
+              border-radius: 6px;
+            }
+            .simulador-box input[type="text"], .simulador-box input[type="number"] { border: 1px solid #ccc; border-radius: 4px; padding: 8px; }
+            .simulador-box button { background-color: #333; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; }
           </style>
         </head>
         <body>
-          <div class="container">
+          <div class="libro-container">
     `;
     let previewHTML = '';
     for (const item of libro) {
@@ -118,6 +158,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
+  // --- El resto del archivo (parseContenido, listeners, etc.) permanece exactamente igual ---
   async function parseContenido(contenido) {
     let result = '';
     const lines = contenido.split('\n');
@@ -129,15 +170,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (match) {
           const tipo = match[1].toLowerCase();
           const params = match[2] ? match[2].split('|').map(p => p.trim()) : [];
-          
-          // --- CAMBIO 1: Buscar por nombre de archivo ---
           const sim = simuladoresDisponibles.find(s => s.file.replace('.js', '') === tipo);
-
           if (sim) {
             try {
               const mod = await import(`./simuladores/${sim.file}`);
               if (mod.default && typeof mod.default.render === 'function') {
-                result += mod.default.render(params);
+                // Pasamos el nombre del manifest al render
+                result += mod.default.render(params, sim.name); 
               } else {
                 result += `<p class="error">Error: El módulo ${sim.file} no tiene un método 'render' válido.</p>`;
               }
@@ -218,7 +257,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     items.forEach(item => {
       const div = document.createElement('div');
       div.classList.add('math-item');
-      div.textContent = item.name; // <-- Seguirá mostrando el nombre amigable del manifest
+      div.textContent = item.name;
       div.onclick = (e) => {
         e.stopPropagation();
         onSelect(item);
@@ -256,7 +295,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupMenu(toolbarButtons[0], simbolos, item => insertAtCursor(`$$${item.code}$$`));
   setupMenu(toolbarButtons[1], ecuaciones, item => insertAtCursor(`$$${item.code}$$`));
   
-  // --- CAMBIO 2: Generar el shortcode aquí mismo ---
   setupMenu(toolbarButtons[2], simuladoresDisponibles, sim => {
     const identifier = sim.file.replace('.js', '');
     const shortcode = `\n[simulador:${identifier}]\n`;
