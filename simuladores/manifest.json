@@ -1,0 +1,18 @@
+[
+  {
+    "name": "Graficador de Funciones",
+    "file": "graficador_funciones.js"
+  },
+  {
+    "name": "Factorial Paso a Paso",
+    "file": "factorial.js"
+  },
+  {
+    "name": "Operaciones con Conjuntos",
+    "file": "conjuntos.js"
+  },
+  {
+    "name": "Dibujar circunferencia",
+    "file": "circulo.js"
+  }
+]
