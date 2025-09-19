@@ -142,7 +142,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let result = '';
     const lines = (contenido || '').split('\n');
     for (const line of lines) {
-        if (line.trim() === '') continue; // Ignorar líneas vacías
+        if (line.trim() === '') continue;
         
         if (line.startsWith('[simulador:')) {
             const match = line.match(/\[simulador:([^|\]]+)\s*\|*\s*(.*?)\]/);
@@ -160,11 +160,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 } else { result += `<p class="error">Simulador no encontrado: ${tipo}</p>`; }
             }
         } else {
-            // Envuelve las líneas de texto normales en párrafos
             result += `<p>${line}</p>`;
         }
     }
-    return result;
+    return result.replace(/<p><\/p>/g, '');
   }
   
   function renderAll() {
@@ -173,7 +172,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     applyLiveTypeset();
   }
 
-  // --- MODAL DE EDICIÓN ---
   let editingId = null;
   function openEditor(pageId) {
     editingId = pageId;
@@ -196,7 +194,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     modalBg.hidden = true;
   }
 
-  // --- CARGA Y MENÚS ---
   async function cargarSimuladores() {
     try {
       const response = await fetch('./simuladores/manifest.json');
@@ -204,43 +201,87 @@ document.addEventListener('DOMContentLoaded', async () => {
     } catch (e) { console.error("Error cargando manifest.json", e); }
   }
 
+  // --- FUNCIÓN DE MENÚS ACTUALIZADA ---
   function setupMenus() {
-    const menusConfig = {
-      'btnSimbolos': { el: document.getElementById('menuSimbolos'), items: [{ name: 'ℝ', code: '\\mathbb{R}' }, { name: '∈', code: '\\in' }, { name: '∑', code: '\\sum' }] },
-      'btnEcuaciones': { el: document.getElementById('menuEcuaciones'), items: [{ name: 'Fracción', code: '\\frac{a}{b}' }, { name: 'Integral', code: '\\int_{a}^{b} f(x) dx' }] },
-      'btnSimuladores': { el: document.getElementById('menuSimuladores'), items: simuladoresDisponibles },
+    const menuSimbolosEl = document.getElementById('menuSimbolos');
+    const menuEcuacionesEl = document.getElementById('menuEcuaciones');
+    const menuSimuladoresEl = document.getElementById('menuSimuladores');
+
+    // Contenido HTML de los nuevos menús
+    const simbolosHTML = `
+      <div class="menu-cat">Conjuntos</div>
+      <span class="math-item" data-code="\\mathbb{N}">ℕ</span> <span class="math-item" data-code="\\mathbb{Z}">ℤ</span>
+      <span class="math-item" data-code="\\mathbb{Q}">ℚ</span> <span class="math-item" data-code="\\mathbb{R}">ℝ</span>
+      <span class="math-item" data-code="\\mathbb{C}">ℂ</span>
+      <div class="menu-cat">Operaciones</div>
+      <span class="math-item" data-code="+">+</span> <span class="math-item" data-code="-">−</span>
+      <span class="math-item" data-code="\\times">×</span> <span class="math-item" data-code="\\cdot">·</span>
+      <span class="math-item" data-code="\\div">÷</span> <span class="math-item" data-code="=">=</span>
+      <span class="math-item" data-code="\\neq">≠</span> <span class="math-item" data-code="\\leq">≤</span>
+      <span class="math-item" data-code="\\geq">≥</span>
+      <div class="menu-cat">Especiales</div>
+      <span class="math-item" data-code="\\infty">∞</span> <span class="math-item" data-code="\\in">∈</span>
+      <span class="math-item" data-code="\\notin">∉</span> <span class="math-item" data-code="\\subset">⊂</span>
+      <span class="math-item" data-code="\\varnothing">∅</span>
+      <div class="menu-cat">Griego</div>
+      <span class="math-item" data-code="\\alpha">α</span> <span class="math-item" data-code="\\beta">β</span>
+      <span class="math-item" data-code="\\gamma">γ</span> <span class="math-item" data-code="\\delta">δ</span>
+      <span class="math-item" data-code="\\theta">θ</span> <span class="math-item" data-code="\\pi">π</span>
+      <span class="math-item" data-code="\\sigma">σ</span> <span class="math-item" data-code="\\omega">ω</span>
+    `;
+    const ecuacionesHTML = `
+      <div class="menu-cat">Estructuras Comunes</div>
+      <span class="math-item" data-code="\\frac{a}{b}">Fracción</span> <span class="math-item" data-code="\\sqrt{a}">Raíz</span>
+      <span class="math-item" data-code="a^{n}">Superíndice</span> <span class="math-item" data-code="a_{n}">Subíndice</span>
+      <span class="math-item" data-code="\\sum_{i=1}^{n} a_i">Sumatoria</span> <span class="math-item" data-code="\\int_{a}^{b} f(x)dx">Integral</span>
+      <span class="math-item" data-code="\\lim_{x\\to 0} f(x)">Límite</span> <span class="math-item" data-code="\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix}">Matriz 2x2</span>
+    `;
+
+    if (menuSimbolosEl) menuSimbolosEl.innerHTML = simbolosHTML;
+    if (menuEcuacionesEl) menuEcuacionesEl.innerHTML = ecuacionesHTML;
+    if (menuSimuladoresEl) menuSimuladoresEl.innerHTML = simuladoresDisponibles.map(item => `<div class="math-item" data-file="${item.file}">${item.name}</div>`).join('');
+
+    // Renderizar los símbolos de LaTeX en los menús
+    if (window.MathJax?.typesetPromise) {
+      MathJax.typesetPromise([menuSimbolosEl, menuEcuacionesEl]);
+    }
+
+    const menus = {
+      'btnSimbolos': menuSimbolosEl,
+      'btnEcuaciones': menuEcuacionesEl,
+      'btnSimuladores': menuSimuladoresEl,
     };
 
-    Object.entries(menusConfig).forEach(([btnId, menuConfig]) => {
+    Object.entries(menus).forEach(([btnId, menuEl]) => {
       const btn = document.getElementById(btnId);
-      const menuEl = menuConfig.el;
       if (!btn || !menuEl) return;
-      
-      menuEl.innerHTML = menuConfig.items.map(item => `<div class="math-item" data-code="${item.code || item.file}">${item.name}</div>`).join('');
       
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
-        Object.values(menusConfig).forEach(m => { if (m.el !== menuEl) m.el.hidden = true; });
-        menuEl.hidden = !menuEl.hidden;
+        const isHidden = menuEl.hidden;
+        Object.values(menus).forEach(m => m.hidden = true);
+        menuEl.hidden = !isHidden;
         const rect = btn.getBoundingClientRect();
-        menuEl.style.top = `${rect.bottom + 5}px`; menuEl.style.left = `${rect.left}px`;
+        menuEl.style.top = `${rect.bottom + 5}px`;
+        menuEl.style.left = `${rect.left}px`;
       });
 
       menuEl.addEventListener('click', (e) => {
         if (e.target.classList.contains('math-item')) {
           let textToInsert = '';
-          if (btnId === 'btnSimuladores') {
-            const fileName = e.target.dataset.code;
-            const identifier = fileName.replace('.js', '');
+          if (e.target.dataset.file) { // Es un simulador
+            const identifier = e.target.dataset.file.replace('.js', '');
             textToInsert = `\n[simulador:${identifier}]\n`;
-          } else { textToInsert = `\\(${e.target.dataset.code}\\)`; }
-          insertAtCursor(inpContenido, textToInsert);
+          } else if (e.target.dataset.code) { // Es LaTeX
+            textToInsert = `\\(${e.target.dataset.code}\\)`;
+          }
+          if (textToInsert) insertAtCursor(inpContenido, textToInsert);
           menuEl.hidden = true;
         }
       });
     });
     
-    document.body.addEventListener('click', () => Object.values(menusConfig).forEach(m => m.el.hidden = true));
+    document.body.addEventListener('click', () => Object.values(menus).forEach(m => m.hidden = true));
   }
   
   function insertAtCursor(textarea, text) {
@@ -248,86 +289,36 @@ document.addEventListener('DOMContentLoaded', async () => {
     textarea.focus();
   }
 
-  // --- EXPORTACIÓN (FUNCIÓN CORREGIDA Y SIMPLIFICADA) ---
   async function download() {
-    // 1. Recopilar los estilos personalizados
     const styles = `
-      :root {
-        --primary-color: #004080;
-        --primary-gradient: linear-gradient(135deg, #0059b3, #003366);
-        --secondary-gradient: linear-gradient(135deg, #e60000, #900000);
-      }
-      body { 
-        background-color: ${controls.bgColor.value}; 
-        color: ${controls.textColor.value}; 
-        font-family: "Segoe UI", Arial, sans-serif; 
-        padding: 1em; 
-        margin: 0; 
-        font-size: ${controls.fontSize.value}px;
-        line-height: ${controls.lineHeight.value};
-      }
-      .page { 
-        background-color: ${controls.paperColor.value}; 
-        padding: 2em; 
-        margin: 1em auto; 
-        max-width: 900px; 
-        border-radius: 8px; 
-        box-shadow: 0 0 10px rgba(0,0,0,0.1); 
-      }
-      .page h2 {
-        color: var(--primary-color);
-        border-bottom: 2px solid #ddd;
-        padding-bottom: 0.3rem;
-      }
-      /* Estilos para los simuladores (copiados del prototipo) */
-      .btn-sim {
-        background: var(--primary-gradient); color: white; font-family: "Segoe UI", Arial, sans-serif;
-        font-size: 16px; font-weight: bold; border: none; border-radius: 6px; padding: 10px 18px;
-        cursor: pointer; box-shadow: 0 3px 8px rgba(0,0,0,0.15); transition: background 0.3s ease, transform 0.2s ease;
-      }
+      :root { --primary-color: #004080; --primary-gradient: linear-gradient(135deg, #0059b3, #003366); --secondary-gradient: linear-gradient(135deg, #e60000, #900000); }
+      body { background-color: ${controls.bgColor.value}; color: ${controls.textColor.value}; font-family: "Segoe UI", Arial, sans-serif; padding: 1em; margin: 0; font-size: ${controls.fontSize.value}px; line-height: ${controls.lineHeight.value}; }
+      .page { background-color: ${controls.paperColor.value}; padding: 2em; margin: 1em auto; max-width: 900px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+      .page h2 { color: var(--primary-color); border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; }
+      .btn-sim { background: var(--primary-gradient); color: white; font-family: "Segoe UI", Arial, sans-serif; font-size: 16px; font-weight: bold; border: none; border-radius: 6px; padding: 10px 18px; cursor: pointer; box-shadow: 0 3px 8px rgba(0,0,0,0.15); transition: background 0.3s ease, transform 0.2s ease; }
       .btn-sim:hover { background: #003366; transform: scale(1.02); }
       .btn-sim-rojo { background: var(--secondary-gradient) !important; }
       .btn-sim-rojo:hover { background: #900000 !important; }
-      .simulador-box {
-        background: #f9f9f9; border-left: 5px solid var(--primary-color); padding: 1rem;
-        margin: 1.2rem 0; border-radius: 6px; color: #333; /* Color de texto legible en fondo claro */
-      }
+      .simulador-box { background: #f9f9f9; border-left: 5px solid var(--primary-color); padding: 1rem; margin: 1.2rem 0; border-radius: 6px; color: #333; }
     `;
 
-    // 2. Pre-renderizar el contenido de TODAS las páginas
     let bodyHTML = '';
     for (const page of pages) {
-      bodyHTML += `
-        <div class="page">
-          <h2>${page.titulo}</h2>
-          ${await parseSingleContent(page.contenido)}
-        </div>
-      `;
+      bodyHTML += `<div class="page"><h2>${page.titulo}</h2>${await parseSingleContent(page.contenido)}</div>`;
     }
 
-    // 3. Construir el HTML final
     const finalHTML = `
-      <!DOCTYPE html>
-      <html lang="es">
-      <head>
-          <meta charset="UTF-8">
-          <title>${pages[0]?.titulo || 'Libro Interactivo'}</title>
-          <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"><\/script>
-          <script src="https://unpkg.com/mathjs@latest/lib/browser/math.js"><\/script>
-          <style>${styles}</style>
-      </head>
-      <body>
-          ${bodyHTML}
-      </body>
-      </html>`;
+      <!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>${pages[0]?.titulo || 'Libro Interactivo'}</title>
+      <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"><\/script>
+      <script src="https://unpkg.com/mathjs@latest/lib/browser/math.js"><\/script>
+      <style>${styles}</style></head><body>${bodyHTML}</body></html>`;
       
-      // 4. Descargar el archivo
-      const blob = new Blob([finalHTML], { type: 'text/html' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'libro-interactivo.html';
-      a.click();
-      URL.revokeObjectURL(a.href);
+    const blob = new Blob([finalHTML], { type: 'text/html' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'libro-interactivo.html';
+    a.click();
+    URL.revokeObjectURL(a.href);
   }
 
   // --- INICIALIZACIÓN ---
@@ -336,7 +327,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('btnCancelar').onclick = () => { modalBg.hidden = true; };
   document.getElementById('btnDescargar').onclick = download;
 
-  // Botones para añadir partes
   document.getElementById('btnAddPortada').onclick = () => addPage('portada', 'Portada', 'Contenido de la portada...');
   document.getElementById('btnAddPrefacio').onclick = () => addPage('prefacio', 'Prefacio', '...');
   document.getElementById('btnAddCapitulo').onclick = () => addPage('capitulo', 'Nuevo Capítulo', '...');
