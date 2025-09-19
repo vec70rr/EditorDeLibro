@@ -14,5 +14,10 @@
   {
     "name": "Dibujar circunferencia",
     "file": "circulo.js"
+  },
+  {
+    "name": "Diagrama de Tallos y Hojas",
+    "file": "tallo_hoja.js"
   }
+  
 ]
