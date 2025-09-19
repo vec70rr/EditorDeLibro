@@ -3,79 +3,81 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Editor de Libro Educativo</title>
+  <title>Editor de Libro Avanzado</title>
   <link rel="stylesheet" href="editor_libro.css">
-  <!-- MathJax para fórmulas -->
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-  <!-- JS principal - lo agregaremos después -->
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
   <script src="editor_libro.js" defer></script>
 </head>
 <body>
   <header>
-    <h1>Generador de Libro</h1>
+    <h1>Generador de Libro Interactivo</h1>
     <div class="sep"></div>
-    <button id="btnPartes">Libro (partes)</button>
-    <button id="btnDeshacer">Deshacer</button>
-    <button id="btnDescargar">Descargar HTML</button>
+    <button id="btnPartes" type="button">Añadir Parte</button>
+    <button id="btnDeshacer" disabled type="button">Deshacer</button>
+    <button id="btnDescargar" type="button">Descargar Lector HTML</button>
   </header>
 
   <div class="layout">
     <aside class="toc">
-      <h2>Índice</h2>
+      <h2>Índice de Contenidos</h2>
       <div class="toolbar">
-        <button>Portada</button>
-        <button>Prefacio</button>
-        <button>Capítulo</button>
-        <button>Sección</button>
-        <button>Subsección</button>
+        <button id="btnAddPortada">Portada</button>
+        <button id="btnAddPrefacio">Prefacio</button>
+        <button id="btnAddCapitulo">Capítulo</button>
+        <button id="btnAddSeccion">Sección</button>
       </div>
-      <ul id="tocList">
-        <!-- Elementos del índice se agregan dinámicamente via JS -->
-      </ul>
+      <ul id="pagesList" class="pages-list">
+        </ul>
     </aside>
 
     <main class="main">
-      <div class="info">
-        Consejo: haz clic en un elemento del índice para <strong>editarlo</strong>. Usa el botón “Libro (partes)” si quieres ver qué puedes agregar.
-        <span class="badge">MathJax listo</span>
-        <span class="badge">Simuladores incluidos</span>
+      <div class="panel">
+        <h3>Ajustes de Composición (Vista Previa y Exportación)</h3>
+        <div class="controls-row">
+          <div class="control"><label for="fontSize">Tamaño Letra (px)</label><input id="fontSize" type="range" min="12" max="22" value="16"></div>
+          <div class="control"><label for="lineHeight">Interlineado</label><input id="lineHeight" type="range" min="1.2" max="1.8" step="0.05" value="1.5"></div>
+          <div class="control"><label for="bgColor">Fondo General</label><input id="bgColor" type="color" value="#f4f4f4"></div>
+          <div class="control"><label for="paperColor">Fondo Página</label><input id="paperColor" type="color" value="#ffffff"></div>
+          <div class="control"><label for="textColor">Color Texto</label><input id="textColor" type="color" value="#333333"></div>
+        </div>
       </div>
 
-      <div class="output with-watermark" id="vistaPrevia">
-        <!-- Vista previa del libro se renderiza aquí -->
-      </div>
+      <style id="liveTypeset"></style>
 
-      <div class="codigo">
-        <h3>HTML generado (solo lectura)</h3>
-        <textarea id="htmlGenerado" readonly></textarea>
+      <div class="panel">
+        <h3>Vista Previa del Libro</h3>
+        <div id="vistaPrevia" class="output">
+          </div>
       </div>
     </main>
   </div>
 
-  <!-- Modal de edición -->
-  <div class="modal-bg" id="modalBg">
+  <div id="modalEditorBg" class="modal-bg" hidden>
     <div class="modal">
-      <h2>Editar</h2>
+      <h2 id="modalTitulo">Editar Parte</h2>
       <div class="row">
-        <label>Título:</label>
+        <label><b>Título:</b></label>
         <input type="text" id="inpTitulo">
       </div>
       <div class="row">
-        <label>Contenido</label>
+        <label><b>Contenido:</b></label>
         <div class="toolbar-line">
-          <button>Símbolos ▼</button>
-          <button>Ecuaciones/Estructuras ▼</button>
-          <button>Simuladores ▼</button>
-          <button>Imagen (JPG)</button>
+          <button id="btnSimbolos">Símbolos ▼</button>
+          <button id="btnEcuaciones">Ecuaciones ▼</button>
+          <button id="btnSimuladores">Simuladores ▼</button>
+          <button id="btnImagen">Imagen</button>
         </div>
-        <textarea id="inpContenido"></textarea>
+        <textarea id="inpContenido" rows="10"></textarea>
       </div>
-      <p class="tip">Tip: para Portada puedes escribir título, autor, fecha. Para Prefacio un texto introductorio. En capítulos y secciones puedes mezclar texto, fórmulas y simuladores.</p>
       <div class="buttons">
         <button id="btnCancelar">Cancelar</button>
         <button id="btnGuardar">Guardar</button>
       </div>
     </div>
   </div>
+
+  <div id="menuSimbolos" class="math-menu" hidden></div>
+  <div id="menuEcuaciones" class="math-menu" hidden></div>
+  <div id="menuSimuladores" class="math-menu" hidden></div>
 </body>
 </html>

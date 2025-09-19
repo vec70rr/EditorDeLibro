@@ -1,310 +1,352 @@
-// Inicialización.
 document.addEventListener('DOMContentLoaded', async () => {
-  // --- Referencias a elementos del DOM (sin cambios) ---
-  const tocList = document.getElementById('tocList');
+  // --- REFERENCIAS AL DOM ---
+  const pagesListEl = document.getElementById('pagesList');
   const vistaPrevia = document.getElementById('vistaPrevia');
-  const htmlGenerado = document.getElementById('htmlGenerado');
-  const modalBg = document.getElementById('modalBg');
+  const modalBg = document.getElementById('modalEditorBg');
+  const modalTitulo = document.getElementById('modalTitulo');
   const inpTitulo = document.getElementById('inpTitulo');
   const inpContenido = document.getElementById('inpContenido');
-  const btnGuardar = document.getElementById('btnGuardar');
-  const btnCancelar = document.getElementById('btnCancelar');
-  const btnDescargar = document.getElementById('btnDescargar');
-  const btnDeshacer = document.getElementById('btnDeshacer');
-  const toolbarButtons = document.querySelectorAll('.toolbar-line button');
-  const tocButtons = document.querySelectorAll('.toc .toolbar button');
-
-  // --- Estructura del libro y estado (sin cambios) ---
-  let libro = [
-    { tipo: 'portada', titulo: 'Portada', contenido: 'Título del Libro\nAutor\nFecha' },
-    { tipo: 'prefacio', titulo: 'Prefacio', contenido: 'Introducción...' }
-  ];
-  let selectedIndex = null;
-  let history = [];
-
+  const liveTypesetEl = document.getElementById('liveTypeset');
+  
+  // --- ESTADO DE LA APLICACIÓN ---
+  let pages = [];
+  let selectedId = null;
+  let idSeq = 1;
+  const historyStack = [];
   let simuladoresDisponibles = [];
 
-  async function cargarSimuladores() {
-    try {
-      const response = await fetch('./simuladores/manifest.json');
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      simuladoresDisponibles = await response.json();
-    } catch (error) {
-      console.error("Error fatal: No se pudo cargar la lista de simuladores desde 'manifest.json'", error);
-      alert("Error: No se pudo cargar la lista de simuladores. Revisa el archivo 'simuladores/manifest.json'.");
+  // --- CONTROLES DE COMPOSICIÓN ---
+  const controls = {
+    fontSize: document.getElementById('fontSize'),
+    lineHeight: document.getElementById('lineHeight'),
+    bgColor: document.getElementById('bgColor'),
+    textColor: document.getElementById('textColor'),
+    paperColor: document.getElementById('paperColor'),
+  };
+
+  // --- HISTORIAL (UNDO/REDO) ---
+  function pushHistory() {
+    historyStack.push(JSON.stringify(pages));
+    document.getElementById('btnDeshacer').disabled = historyStack.length <= 1;
+  }
+
+  function undo() {
+    if (historyStack.length > 1) {
+      historyStack.pop();
+      pages = JSON.parse(historyStack[historyStack.length - 1]);
+      selectedId = null;
+      renderAll();
     }
   }
-  
-  const simbolos = [
-    { name: 'Fracción', code: '\\frac{a}{b}' },
-    { name: 'Suma', code: '\\sum_{i=0}^{n} i' },
-    { name: 'Integral', code: '\\int_{a}^{b} f(x) dx' }
-  ];
-  const ecuaciones = [
-    { name: 'Matriz 2x2', code: '\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix}' },
-    { name: 'Ecuación Cuadrática', code: 'ax^2 + bx + c = 0' },
-    { name: 'Seno', code: '\\sin(x)' }
-  ];
 
-  function saveHistory() {
-    history.push(JSON.stringify(libro));
-    if (history.length > 20) history.shift();
+  // --- GESTIÓN DE PÁGINAS (MOVER, BORRAR, SELECCIONAR) ---
+  function addPage(tipo, titulo, contenido) {
+    const newPage = { id: `p${idSeq++}`, tipo, titulo, contenido };
+    pages.push(newPage);
+    selectedId = newPage.id;
+    pushHistory();
+    renderAll();
+    return newPage;
   }
 
-  function renderTOC() {
-    tocList.innerHTML = '';
-    libro.forEach((item, idx) => {
+  function movePage(pageId, direction) {
+    const index = pages.findIndex(p => p.id === pageId);
+    if (index === -1) return;
+    const newIndex = index + direction;
+    if (newIndex < 0 || newIndex >= pages.length) return;
+    const [item] = pages.splice(index, 1);
+    pages.splice(newIndex, 0, item);
+    pushHistory();
+    renderAll();
+  }
+
+  function deletePage(pageId) {
+    if (!confirm('¿Estás seguro de que quieres eliminar esta parte del libro?')) return;
+    pages = pages.filter(p => p.id !== pageId);
+    if (selectedId === pageId) selectedId = null;
+    pushHistory();
+    renderAll();
+  }
+
+  // --- RENDERIZADO ---
+  function renderPagesList() {
+    pagesListEl.innerHTML = "";
+    pages.forEach(page => {
       const li = document.createElement('li');
-      li.textContent = `${item.tipo.charAt(0).toUpperCase() + item.tipo.slice(1)}: ${item.titulo}`;
-      li.classList.add(`lvl-${['portada', 'prefacio'].includes(item.tipo) ? 0 : item.tipo === 'capitulo' ? 1 : item.tipo === 'seccion' ? 2 : 3}`);
-      li.onclick = () => {
-        selectedIndex = idx;
-        inpTitulo.value = item.titulo;
-        inpContenido.value = item.contenido;
-        modalBg.style.display = 'flex';
-      };
-      tocList.appendChild(li);
+      li.className = `page-item ${page.id === selectedId ? 'selected' : ''}`;
+      li.onclick = () => { selectedId = page.id; renderPagesList(); };
+
+      const title = document.createElement('div');
+      title.className = 'page-title';
+      title.textContent = page.titulo || '(Sin Título)';
+
+      const actions = document.createElement('div');
+      actions.className = 'page-actions';
+      
+      const btnEdit = document.createElement('button'); btnEdit.textContent = '✏️'; btnEdit.title = "Editar";
+      btnEdit.onclick = (e) => { e.stopPropagation(); openEditor(page.id); };
+      
+      const btnUp = document.createElement('button'); btnUp.textContent = '🔼'; btnUp.title = "Mover Arriba";
+      btnUp.onclick = (e) => { e.stopPropagation(); movePage(page.id, -1); };
+
+      const btnDown = document.createElement('button'); btnDown.textContent = '🔽'; btnDown.title = "Mover Abajo";
+      btnDown.onclick = (e) => { e.stopPropagation(); movePage(page.id, 1); };
+
+      const btnDel = document.createElement('button'); btnDel.textContent = '🗑️'; btnDel.className = 'danger'; btnDel.title = "Eliminar";
+      btnDel.onclick = (e) => { e.stopPropagation(); deletePage(page.id); };
+      
+      actions.append(btnEdit, btnUp, btnDown, btnDel);
+      li.append(title, actions);
+      pagesListEl.appendChild(li);
     });
   }
 
-  async function renderLibro() {
-    // --- ¡CAMBIO IMPORTANTE! SECCIÓN DE ESTILOS ACTUALIZADA ---
-    let completeHTML = `
-      <!DOCTYPE html>
-      <html lang="es">
-        <head>
-          <title>Libro Generado</title>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-          <script src="https://unpkg.com/mathjs@latest/lib/browser/math.js"></script>
-          <style>
-            :root {
-              --primary-color: #004080;
-              --primary-gradient: linear-gradient(135deg, #0059b3, #003366);
-              --secondary-gradient: linear-gradient(135deg, #e60000, #900000);
-              --text-color: #333;
-              --background-color: #f4f4f4;
-            }
-            body {
-              font-family: "Segoe UI", Arial, sans-serif;
-              background: var(--background-color);
-              color: var(--text-color);
-              margin: 0;
-              padding: 2rem;
-              line-height: 1.6;
-            }
-            .libro-container {
-              background: #ffffff;
-              max-width: 900px;
-              margin: 0 auto;
-              padding: 2rem 3rem;
-              border-radius: 8px;
-              box-shadow: 0 0 12px rgba(0,0,0,0.15);
-            }
-            h1, h2, h3, h4, h5 {
-              color: var(--primary-color);
-            }
-            h1 { border-left: 5px solid var(--primary-color); padding-left: 0.5rem; margin-top: 0; }
-            h2 { border-bottom: 2px solid #ddd; padding-bottom: 0.3rem; margin-top: 1.5rem; }
-            .equation { margin: 15px 0; text-align: center; }
-            img { max-width: 100%; height: auto; display: block; margin: 15px auto; border-radius: 5px; }
-            .error { color: red; font-weight: bold; }
-            .btn-sim {
-              background: var(--primary-gradient);
-              color: white;
-              font-family: "Segoe UI", Arial, sans-serif;
-              font-size: 16px;
-              font-weight: bold;
-              border: none;
-              border-radius: 6px;
-              padding: 10px 18px;
-              cursor: pointer;
-              box-shadow: 0 3px 8px rgba(0,0,0,0.15);
-              transition: background 0.3s ease, transform 0.2s ease;
-              margin-top: 10px;
-            }
-            .btn-sim:hover { background: #003366; transform: scale(1.02); }
-            .btn-sim-rojo { background: var(--secondary-gradient) !important; }
-            .btn-sim-rojo:hover { background: #900000 !important; }
-            .simulador-box {
-              background: #f9f9f9;
-              border-left: 5px solid var(--primary-color);
-              padding: 1rem;
-              margin: 1.2rem 0;
-              border-radius: 6px;
-            }
-            .simulador-box input[type="text"], .simulador-box input[type="number"] { border: 1px solid #ccc; border-radius: 4px; padding: 8px; }
-            .simulador-box button { background-color: #333; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; }
-          </style>
-        </head>
-        <body>
-          <div class="libro-container">
-    `;
-    let previewHTML = '';
-    for (const item of libro) {
-      const tag = item.tipo === 'portada' ? 'h1' : item.tipo === 'prefacio' ? 'h2' : item.tipo === 'capitulo' ? 'h3' : item.tipo === 'seccion' ? 'h4' : 'h5';
-      const parsedTitle = `<${tag}>${item.titulo}</${tag}>`;
-      const parsedContent = await parseContenido(item.contenido);
-      previewHTML += parsedTitle + parsedContent;
+  async function renderPreview() {
+    vistaPrevia.innerHTML = "";
+    for (const page of pages) {
+        const pageContainer = document.createElement('div');
+        pageContainer.className = 'paper-container';
+        const pageTitle = document.createElement('h3');
+        pageTitle.textContent = page.titulo;
+        const pageContent = document.createElement('div');
+        pageContent.className = 'paper-content';
+        pageContent.innerHTML = await parseSingleContent(page.contenido);
+        pageContainer.append(pageTitle, pageContent);
+        vistaPrevia.appendChild(pageContainer);
     }
-    completeHTML += previewHTML + '</div></body></html>';
-    vistaPrevia.innerHTML = previewHTML;
-    htmlGenerado.value = completeHTML;
-    if (window.MathJax) {
-      MathJax.typesetPromise([vistaPrevia]).catch(err => console.error('MathJax error:', err));
-    }
+    if (window.MathJax?.typesetPromise) MathJax.typesetPromise([vistaPrevia]);
   }
 
-  // --- El resto del archivo (parseContenido, listeners, etc.) permanece exactamente igual ---
-  async function parseContenido(contenido) {
-    let result = '';
-    const lines = contenido.split('\n');
-    for (const line of lines) {
-      if (line.startsWith('$$') && line.endsWith('$$')) {
-        result += `<div class="equation">\\(${line.slice(2, -2)}\\)</div>`;
-      } else if (line.startsWith('[simulador:')) {
-        const match = line.match(/\[simulador:([^|\]]+)\s*\|*\s*(.*?)\]/);
-        if (match) {
-          const tipo = match[1].toLowerCase();
-          const params = match[2] ? match[2].split('|').map(p => p.trim()) : [];
-          const sim = simuladoresDisponibles.find(s => s.file.replace('.js', '') === tipo);
-          if (sim) {
-            try {
-              const mod = await import(`./simuladores/${sim.file}`);
-              if (mod.default && typeof mod.default.render === 'function') {
-                // Pasamos el nombre del manifest al render
-                result += mod.default.render(params, sim.name); 
-              } else {
-                result += `<p class="error">Error: El módulo ${sim.file} no tiene un método 'render' válido.</p>`;
-              }
-            } catch (e) {
-              console.error(`Error cargando simulador ${sim.file}:`, e);
-              result += `<p class="error">Error: No se pudo cargar el simulador "${sim.name}".</p>`;
-            }
-          } else {
-            result += `<p class="error">Error: Simulador "${tipo}" no encontrado.</p>`;
-          }
-        }
-      } else if (line.startsWith('[imagen:')) {
-        const match = line.match(/\[imagen:(.+?)\]/);
-        if (match) {
-          result += `<img src="${match[1]}" alt="Imagen">`;
-        }
-      } else if (line.trim() !== '') {
-        result += `<p>${line}</p>`;
+  function applyLiveTypeset() {
+    const css = `
+      #vistaPrevia {
+        background-color: ${controls.bgColor.value};
+        padding: 1em;
+        border-radius: 8px;
       }
+      .paper-container {
+        background-color: ${controls.paperColor.value};
+        color: ${controls.textColor.value};
+        font-size: ${controls.fontSize.value}px;
+        line-height: ${controls.lineHeight.value};
+        padding: 1.5em;
+        margin-bottom: 1em;
+        border-radius: 4px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      }
+    `;
+    liveTypesetEl.textContent = css;
+  }
+
+  async function parseSingleContent(contenido) {
+    let result = '';
+    const lines = (contenido || '').split('\n');
+    for (const line of lines) {
+        if (line.trim() === '') continue; // Ignorar líneas vacías
+        
+        if (line.startsWith('[simulador:')) {
+            const match = line.match(/\[simulador:([^|\]]+)\s*\|*\s*(.*?)\]/);
+            if (match) {
+                const tipo = match[1].toLowerCase().trim();
+                const params = match[2] ? match[2].split('|').map(p => p.trim()) : [];
+                const sim = simuladoresDisponibles.find(s => s.file.replace('.js', '') === tipo);
+                if (sim) {
+                    try {
+                        const mod = await import(`./simuladores/${sim.file}`);
+                        if (mod.default && typeof mod.default.render === 'function') {
+                            result += mod.default.render(params, sim.name);
+                        }
+                    } catch (e) { result += `<p class="error">Error al cargar simulador.</p>`; }
+                } else { result += `<p class="error">Simulador no encontrado: ${tipo}</p>`; }
+            }
+        } else {
+            // Envuelve las líneas de texto normales en párrafos
+            result += `<p>${line}</p>`;
+        }
     }
     return result;
   }
   
-  tocButtons.forEach(btn => {
-    btn.onclick = () => {
-      saveHistory();
-      const tipo = btn.textContent.toLowerCase();
-      libro.push({
-        tipo,
-        titulo: `Nuevo ${tipo.charAt(0).toUpperCase() + tipo.slice(1)}`,
-        contenido: 'Contenido...'
-      });
-      renderTOC();
-      renderLibro();
-    };
-  });
-
-  btnGuardar.onclick = () => {
-    if (selectedIndex !== null) {
-      saveHistory();
-      libro[selectedIndex].titulo = inpTitulo.value;
-      libro[selectedIndex].contenido = inpContenido.value;
-      renderTOC();
-      renderLibro();
-    }
-    modalBg.style.display = 'none';
-  };
-  btnCancelar.onclick = () => modalBg.style.display = 'none';
-
-  btnDeshacer.onclick = () => {
-    if (history.length > 0) {
-      libro = JSON.parse(history.pop());
-      renderTOC();
-      renderLibro();
-    }
-  };
-
-  btnDescargar.onclick = () => {
-    const blob = new Blob([htmlGenerado.value], { type: 'text/html' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'libro.html';
-    a.click();
-  };
-
-  function insertAtCursor(text) {
-    const start = inpContenido.selectionStart;
-    const end = inpContenido.selectionEnd;
-    const value = inpContenido.value;
-    inpContenido.value = value.substring(0, start) + text + value.substring(end);
-    inpContenido.selectionStart = inpContenido.selectionEnd = start + text.length;
-    inpContenido.focus();
+  function renderAll() {
+    renderPagesList();
+    renderPreview();
+    applyLiveTypeset();
   }
 
-  function createMenu(items, onSelect) {
-    const menu = document.createElement('div');
-    menu.classList.add('math-menu');
-    items.forEach(item => {
-      const div = document.createElement('div');
-      div.classList.add('math-item');
-      div.textContent = item.name;
-      div.onclick = (e) => {
+  // --- MODAL DE EDICIÓN ---
+  let editingId = null;
+  function openEditor(pageId) {
+    editingId = pageId;
+    const page = pages.find(p => p.id === pageId);
+    if (!page) return;
+    modalTitulo.textContent = `Editando: ${page.titulo}`;
+    inpTitulo.value = page.titulo;
+    inpContenido.value = page.contenido;
+    modalBg.hidden = false;
+  }
+
+  function saveEditor() {
+    const page = pages.find(p => p.id === editingId);
+    if (page) {
+      page.titulo = inpTitulo.value;
+      page.contenido = inpContenido.value;
+      pushHistory();
+      renderAll();
+    }
+    modalBg.hidden = true;
+  }
+
+  // --- CARGA Y MENÚS ---
+  async function cargarSimuladores() {
+    try {
+      const response = await fetch('./simuladores/manifest.json');
+      simuladoresDisponibles = await response.json();
+    } catch (e) { console.error("Error cargando manifest.json", e); }
+  }
+
+  function setupMenus() {
+    const menusConfig = {
+      'btnSimbolos': { el: document.getElementById('menuSimbolos'), items: [{ name: 'ℝ', code: '\\mathbb{R}' }, { name: '∈', code: '\\in' }, { name: '∑', code: '\\sum' }] },
+      'btnEcuaciones': { el: document.getElementById('menuEcuaciones'), items: [{ name: 'Fracción', code: '\\frac{a}{b}' }, { name: 'Integral', code: '\\int_{a}^{b} f(x) dx' }] },
+      'btnSimuladores': { el: document.getElementById('menuSimuladores'), items: simuladoresDisponibles },
+    };
+
+    Object.entries(menusConfig).forEach(([btnId, menuConfig]) => {
+      const btn = document.getElementById(btnId);
+      const menuEl = menuConfig.el;
+      if (!btn || !menuEl) return;
+      
+      menuEl.innerHTML = menuConfig.items.map(item => `<div class="math-item" data-code="${item.code || item.file}">${item.name}</div>`).join('');
+      
+      btn.addEventListener('click', (e) => {
         e.stopPropagation();
-        onSelect(item);
-        document.body.removeChild(menu);
-      };
-      menu.appendChild(div);
+        Object.values(menusConfig).forEach(m => { if (m.el !== menuEl) m.el.hidden = true; });
+        menuEl.hidden = !menuEl.hidden;
+        const rect = btn.getBoundingClientRect();
+        menuEl.style.top = `${rect.bottom + 5}px`; menuEl.style.left = `${rect.left}px`;
+      });
+
+      menuEl.addEventListener('click', (e) => {
+        if (e.target.classList.contains('math-item')) {
+          let textToInsert = '';
+          if (btnId === 'btnSimuladores') {
+            const fileName = e.target.dataset.code;
+            const identifier = fileName.replace('.js', '');
+            textToInsert = `\n[simulador:${identifier}]\n`;
+          } else { textToInsert = `\\(${e.target.dataset.code}\\)`; }
+          insertAtCursor(inpContenido, textToInsert);
+          menuEl.hidden = true;
+        }
+      });
     });
-    return menu;
+    
+    document.body.addEventListener('click', () => Object.values(menusConfig).forEach(m => m.el.hidden = true));
+  }
+  
+  function insertAtCursor(textarea, text) {
+    textarea.setRangeText(text, textarea.selectionStart, textarea.selectionEnd, 'end');
+    textarea.focus();
   }
 
-  let closeMenuHandler = null;
-  function setupMenu(button, items, onSelect) {
-    button.onclick = (e) => {
-      e.stopPropagation();
-      if (closeMenuHandler) closeMenuHandler();
-      const menu = createMenu(items, onSelect);
-      document.body.appendChild(menu);
-      const rect = button.getBoundingClientRect();
-      menu.style.position = 'absolute';
-      menu.style.top = `${rect.bottom + window.scrollY}px`;
-      menu.style.left = `${rect.left + window.scrollX}px`;
-      menu.style.display = 'block';
+  // --- EXPORTACIÓN (FUNCIÓN CORREGIDA Y SIMPLIFICADA) ---
+  async function download() {
+    // 1. Recopilar los estilos personalizados
+    const styles = `
+      :root {
+        --primary-color: #004080;
+        --primary-gradient: linear-gradient(135deg, #0059b3, #003366);
+        --secondary-gradient: linear-gradient(135deg, #e60000, #900000);
+      }
+      body { 
+        background-color: ${controls.bgColor.value}; 
+        color: ${controls.textColor.value}; 
+        font-family: "Segoe UI", Arial, sans-serif; 
+        padding: 1em; 
+        margin: 0; 
+        font-size: ${controls.fontSize.value}px;
+        line-height: ${controls.lineHeight.value};
+      }
+      .page { 
+        background-color: ${controls.paperColor.value}; 
+        padding: 2em; 
+        margin: 1em auto; 
+        max-width: 900px; 
+        border-radius: 8px; 
+        box-shadow: 0 0 10px rgba(0,0,0,0.1); 
+      }
+      .page h2 {
+        color: var(--primary-color);
+        border-bottom: 2px solid #ddd;
+        padding-bottom: 0.3rem;
+      }
+      /* Estilos para los simuladores (copiados del prototipo) */
+      .btn-sim {
+        background: var(--primary-gradient); color: white; font-family: "Segoe UI", Arial, sans-serif;
+        font-size: 16px; font-weight: bold; border: none; border-radius: 6px; padding: 10px 18px;
+        cursor: pointer; box-shadow: 0 3px 8px rgba(0,0,0,0.15); transition: background 0.3s ease, transform 0.2s ease;
+      }
+      .btn-sim:hover { background: #003366; transform: scale(1.02); }
+      .btn-sim-rojo { background: var(--secondary-gradient) !important; }
+      .btn-sim-rojo:hover { background: #900000 !important; }
+      .simulador-box {
+        background: #f9f9f9; border-left: 5px solid var(--primary-color); padding: 1rem;
+        margin: 1.2rem 0; border-radius: 6px; color: #333; /* Color de texto legible en fondo claro */
+      }
+    `;
 
-      closeMenuHandler = () => {
-        if (document.body.contains(menu)) document.body.removeChild(menu);
-        document.removeEventListener('click', closeMenuHandler);
-        closeMenuHandler = null;
-      };
-      setTimeout(() => document.addEventListener('click', closeMenuHandler), 0);
-    };
+    // 2. Pre-renderizar el contenido de TODAS las páginas
+    let bodyHTML = '';
+    for (const page of pages) {
+      bodyHTML += `
+        <div class="page">
+          <h2>${page.titulo}</h2>
+          ${await parseSingleContent(page.contenido)}
+        </div>
+      `;
+    }
+
+    // 3. Construir el HTML final
+    const finalHTML = `
+      <!DOCTYPE html>
+      <html lang="es">
+      <head>
+          <meta charset="UTF-8">
+          <title>${pages[0]?.titulo || 'Libro Interactivo'}</title>
+          <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"><\/script>
+          <script src="https://unpkg.com/mathjs@latest/lib/browser/math.js"><\/script>
+          <style>${styles}</style>
+      </head>
+      <body>
+          ${bodyHTML}
+      </body>
+      </html>`;
+      
+      // 4. Descargar el archivo
+      const blob = new Blob([finalHTML], { type: 'text/html' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'libro-interactivo.html';
+      a.click();
+      URL.revokeObjectURL(a.href);
   }
+
+  // --- INICIALIZACIÓN ---
+  document.getElementById('btnDeshacer').onclick = undo;
+  document.getElementById('btnGuardar').onclick = saveEditor;
+  document.getElementById('btnCancelar').onclick = () => { modalBg.hidden = true; };
+  document.getElementById('btnDescargar').onclick = download;
+
+  // Botones para añadir partes
+  document.getElementById('btnAddPortada').onclick = () => addPage('portada', 'Portada', 'Contenido de la portada...');
+  document.getElementById('btnAddPrefacio').onclick = () => addPage('prefacio', 'Prefacio', '...');
+  document.getElementById('btnAddCapitulo').onclick = () => addPage('capitulo', 'Nuevo Capítulo', '...');
+  document.getElementById('btnAddSeccion').onclick = () => addPage('seccion', 'Nueva Sección', '...');
+  
+  Object.values(controls).forEach(input => input.addEventListener('input', renderAll));
 
   await cargarSimuladores();
-  
-  setupMenu(toolbarButtons[0], simbolos, item => insertAtCursor(`$$${item.code}$$`));
-  setupMenu(toolbarButtons[1], ecuaciones, item => insertAtCursor(`$$${item.code}$$`));
-  
-  setupMenu(toolbarButtons[2], simuladoresDisponibles, sim => {
-    const identifier = sim.file.replace('.js', '');
-    const shortcode = `\n[simulador:${identifier}]\n`;
-    insertAtCursor(shortcode);
-  });
-  
-  setupMenu(toolbarButtons[3], [{name: "Imagen URL", code: ""}], () => {
-    insertAtCursor('\n[imagen:https://via.placeholder.com/150]\n');
-  });
-
-  renderTOC();
-  renderLibro();
+  setupMenus();
+  addPage('portada', 'Título de mi Libro', 'Haz clic en "✏️" para editar esta página.');
+  pushHistory();
+  renderAll();
 });
