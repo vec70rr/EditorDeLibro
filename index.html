@@ -25,9 +25,11 @@
         <button id="btnAddPrefacio">Prefacio</button>
         <button id="btnAddCapitulo">Capítulo</button>
         <button id="btnAddSeccion">Sección</button>
+        <button id="btnOpenUpload" style="grid-column: 1 / -1; background-color: #166534; color: white;">+ Subir Simulador</button>
       </div>
       <ul id="pagesList" class="pages-list">
         </ul>
+
     </aside>
 
     <main class="main">
@@ -79,5 +81,24 @@
   <div id="menuSimbolos" class="math-menu" hidden></div>
   <div id="menuEcuaciones" class="math-menu" hidden></div>
   <div id="menuSimuladores" class="math-menu" hidden></div>
+
+  <div id="modalUploadBg" class="modal-bg" hidden>
+    <div class="modal">
+      <h2>Subir Nuevo Simulador</h2>
+      <div class="row">
+        <label for="inpSimName">Nombre para el Menú:</label>
+        <input type="text" id="inpSimName" placeholder="Ej: Calculadora de Vectores">
+      </div>
+      <div class="row">
+        <label for="inpSimFile">Subir archivo (.js):</label>
+        <input type="file" id="inpSimFile" accept=".js,text/javascript">
+      </div>
+      <div id="uploadStatus" style="font-weight: bold; margin-top: 10px;"></div>
+      <div class="buttons">
+        <button id="btnCancelUpload">Cancelar</button>
+        <button id="btnConfirmUpload">Subir y Guardar</button>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
