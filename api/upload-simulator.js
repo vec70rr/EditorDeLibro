@@ -1,13 +1,11 @@
 const { Octokit } = require("octokit");
 
-// Configuración del Repositorio. Reemplaza con tu usuario y nombre de repo si son diferentes.
-const GITHUB_OWNER = 'vec70rr'; // Tu usuario de GitHub
-const GITHUB_REPO = 'EditorDeLibro'; // El nombre de tu repositorio
-const GITHUB_BRANCH = 'main'; // O 'master'
+// Configuración del Repositorio.
+const GITHUB_OWNER = 'vec70rr';
+const GITHUB_REPO = 'EditorDeLibro';
+const GITHUB_BRANCH = 'main';
 
-// Esta es la función serverless que se ejecutará en Vercel
 module.exports = async (req, res) => {
-  // Solo permitir peticiones POST
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Método no permitido' });
   }
@@ -21,63 +19,60 @@ module.exports = async (req, res) => {
 
     const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
 
-    // --- Proceso de Commit a través de la API ---
+    // --- Proceso de Commit a través de la API (CORREGIDO) ---
 
+    // 1. Obtener la referencia de la rama para el SHA del último commit
     const { data: refData } = await octokit.rest.git.getRef({
       owner: GITHUB_OWNER, repo: GITHUB_REPO, ref: `heads/${GITHUB_BRANCH}`,
     });
-    const parentSha = refData.object.sha;
+    const parentCommitSha = refData.object.sha;
 
-    // Obtener el manifest.json para evitar sobreescribirlo si hay un commit intermedio
-    // (Esta es una mejora de robustez)
-    let manifestJson;
-    let manifestSha;
-    try {
-        const { data: manifestData } = await octokit.rest.repos.getContent({
-            owner: GITHUB_OWNER, repo: GITHUB_REPO, path: 'simuladores/manifest.json',
-        });
-        manifestSha = manifestData.sha;
-        const manifestContent = Buffer.from(manifestData.content, 'base64').toString('utf8');
-        manifestJson = JSON.parse(manifestContent);
-    } catch(e) {
-        // Si el manifest no existe, creamos uno nuevo
-        manifestJson = [];
-    }
+    // --- PASO ADICIONAL CORREGIDO ---
+    // 2. Usar el SHA del commit para obtener el SHA del árbol de archivos base
+    const { data: commitData } = await octokit.rest.git.getCommit({
+        owner: GITHUB_OWNER, repo: GITHUB_REPO, commit_sha: parentCommitSha,
+    });
+    const baseTreeSha = commitData.tree.sha;
+
+    // 3. Obtener el contenido actual del manifest.json
+    const { data: manifestData } = await octokit.rest.repos.getContent({
+      owner: GITHUB_OWNER, repo: GITHUB_REPO, path: 'simuladores/manifest.json',
+    });
+    const manifestContent = Buffer.from(manifestData.content, 'base64').toString('utf8');
+    const manifestJson = JSON.parse(manifestContent);
 
     manifestJson.push({ name, file: fileName });
     const updatedManifestContent = JSON.stringify(manifestJson, null, 2);
 
-    const treePayload = [
-      { path: `simuladores/${fileName}`, mode: '100644', type: 'blob', content: code },
-      { path: 'simuladores/manifest.json', mode: '100644', type: 'blob', content: updatedManifestContent }
-    ];
-
-    const { data: tree } = await octokit.rest.git.createTree({
-      owner: GITHUB_OWNER,
-      repo: GITHUB_REPO,
-      base_tree: refData.object.sha,
-      tree: treePayload,
+    // 4. Crear un nuevo árbol de archivos basado en el árbol anterior
+    const { data: newTree } = await octokit.rest.git.createTree({
+      owner: GITHUB_OWNER, repo: GITHUB_REPO,
+      base_tree: baseTreeSha, // <-- Usamos el SHA del árbol, no del commit
+      tree: [
+        { path: `simuladores/${fileName}`, mode: '100644', content: code },
+        { path: 'simuladores/manifest.json', mode: '100644', content: updatedManifestContent }
+      ],
     });
 
-    const { data: commit } = await octokit.rest.git.createCommit({
-      owner: GITHUB_OWNER,
-      repo: GITHUB_REPO,
+    // 5. Crear el nuevo commit
+    const { data: newCommit } = await octokit.rest.git.createCommit({
+      owner: GITHUB_OWNER, repo: GITHUB_REPO,
       message: `feat: Añadir nuevo simulador '${name}' vía API`,
-      tree: tree.sha,
-      parents: [parentSha],
+      tree: newTree.sha,
+      parents: [parentCommitSha],
     });
 
+    // 6. Actualizar la rama para que apunte al nuevo commit
     await octokit.rest.git.updateRef({
-      owner: GITHUB_OWNER,
-      repo: GITHUB_REPO,
+      owner: GITHUB_OWNER, repo: GITHUB_REPO,
       ref: `heads/${GITHUB_BRANCH}`,
-      sha: commit.sha,
+      sha: newCommit.sha,
     });
 
     res.status(200).json({ message: '¡Simulador subido y desplegado con éxito!' });
 
   } catch (error) {
-    console.error(error);
+    console.error("Error detallado en la función serverless:", error);
     res.status(500).json({ message: 'Error en el servidor al subir el simulador.', error: error.message });
   }
 };
