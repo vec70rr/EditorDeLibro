@@ -39,6 +39,49 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
+  // --- GUARDADO Y CARGA DE PROYECTOS ---
+  function saveProject() {
+    // Tomamos el estado actual de las páginas y lo convertimos a un texto JSON
+    const projectData = JSON.stringify(pages, null, 2);
+    const blob = new Blob([projectData], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    // Usamos el título de la primera página para el nombre del archivo
+    const fileName = (pages[0]?.titulo || 'proyecto-libro').replace(/ /g, '_');
+    a.download = `${fileName}.json`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  function loadProject(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const projectData = JSON.parse(e.target.result);
+        // Validamos que sea un array (una simple comprobación)
+        if (Array.isArray(projectData)) {
+          pages = projectData;
+          historyStack.length = 0; // Reiniciar el historial
+          pushHistory();
+          selectedId = null;
+          renderAll();
+          alert('¡Proyecto cargado con éxito!');
+        } else {
+          throw new Error('El archivo no tiene el formato de proyecto correcto.');
+        }
+      } catch (error) {
+        console.error("Error al cargar el proyecto:", error);
+        alert(`Error: No se pudo cargar el archivo. Asegúrate de que sea un archivo de proyecto válido.\n\nDetalle: ${error.message}`);
+      }
+    };
+    reader.readAsText(file);
+    // Limpiar el input para poder cargar el mismo archivo de nuevo si es necesario
+    event.target.value = '';
+  }
+
   // --- GESTIÓN DE PÁGINAS (MOVER, BORRAR, SELECCIONAR) ---
   function addPage(tipo, titulo, contenido) {
     const newPage = { id: `p${idSeq++}`, tipo, titulo, contenido };
@@ -326,6 +369,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('btnGuardar').onclick = saveEditor;
   document.getElementById('btnCancelar').onclick = () => { modalBg.hidden = true; };
   document.getElementById('btnDescargar').onclick = download;
+
+  // --- MODIFICAR HTML ANTERIOR ---
+  document.getElementById('btnGuardarProyecto').onclick = saveProject;
+  document.getElementById('btnCargarProyecto').addEventListener('change', loadProject);
 
   document.getElementById('btnAddPortada').onclick = () => addPage('portada', 'Portada', 'Contenido de la portada...');
   document.getElementById('btnAddPrefacio').onclick = () => addPage('prefacio', 'Prefacio', '...');

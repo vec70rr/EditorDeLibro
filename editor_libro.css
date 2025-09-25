@@ -162,3 +162,14 @@ header button:disabled { opacity: .5; cursor: not-allowed; }
   cursor: pointer;
 }
 .math-item:hover { background-color: #f0f0f0; }
+
+.header-button-label {
+  padding: 8px 12px;
+  border: 1px solid white;
+  background: transparent;
+  color: white;
+  cursor: pointer;
+  border-radius: 6px;
+  font-size: 14px; /* Asegúrate de que coincida con el tamaño de los otros botones */
+  display: inline-block;
+}
