@@ -18,6 +18,9 @@
   {
     "name": "Diagrama de Tallos y Hojas",
     "file": "tallo_hoja.js"
+  },
+  {
+    "name": "Suma 2 numeros",
+    "file": "sumadornumeros.js"
   }
-  
 ]
