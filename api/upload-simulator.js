@@ -1,5 +1,4 @@
-// El único cambio está en la primera línea.
-const { Octokit } = await import("octokit");
+// NO hay ningún 'require' o 'import' aquí arriba.
 
 // Configuración del Repositorio.
 const GITHUB_OWNER = 'vec70rr';
@@ -7,6 +6,10 @@ const GITHUB_REPO = 'EditorDeLibro';
 const GITHUB_BRANCH = 'main';
 
 module.exports = async (req, res) => {
+  // --- EL CAMBIO CLAVE ESTÁ AQUÍ ---
+  // Importamos la librería DENTRO de la función async
+  const { Octokit } = await import("octokit");
+
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Método no permitido' });
   }
@@ -20,7 +23,7 @@ module.exports = async (req, res) => {
 
     const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
 
-    // --- Proceso de Commit a través de la API ---
+    // --- El resto del proceso de Commit ---
 
     const { data: refData } = await octokit.rest.git.getRef({
       owner: GITHUB_OWNER, repo: GITHUB_REPO, ref: `heads/${GITHUB_BRANCH}`,
