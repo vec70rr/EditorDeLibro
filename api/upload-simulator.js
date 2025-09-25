@@ -1,4 +1,5 @@
-const { Octokit } = require("octokit");
+// El único cambio está en la primera línea.
+const { Octokit } = await import("octokit");
 
 // Configuración del Repositorio.
 const GITHUB_OWNER = 'vec70rr';
@@ -19,22 +20,18 @@ module.exports = async (req, res) => {
 
     const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
 
-    // --- Proceso de Commit a través de la API (CORREGIDO) ---
+    // --- Proceso de Commit a través de la API ---
 
-    // 1. Obtener la referencia de la rama para el SHA del último commit
     const { data: refData } = await octokit.rest.git.getRef({
       owner: GITHUB_OWNER, repo: GITHUB_REPO, ref: `heads/${GITHUB_BRANCH}`,
     });
     const parentCommitSha = refData.object.sha;
 
-    // --- PASO ADICIONAL CORREGIDO ---
-    // 2. Usar el SHA del commit para obtener el SHA del árbol de archivos base
     const { data: commitData } = await octokit.rest.git.getCommit({
         owner: GITHUB_OWNER, repo: GITHUB_REPO, commit_sha: parentCommitSha,
     });
     const baseTreeSha = commitData.tree.sha;
 
-    // 3. Obtener el contenido actual del manifest.json
     const { data: manifestData } = await octokit.rest.repos.getContent({
       owner: GITHUB_OWNER, repo: GITHUB_REPO, path: 'simuladores/manifest.json',
     });
@@ -44,17 +41,15 @@ module.exports = async (req, res) => {
     manifestJson.push({ name, file: fileName });
     const updatedManifestContent = JSON.stringify(manifestJson, null, 2);
 
-    // 4. Crear un nuevo árbol de archivos basado en el árbol anterior
     const { data: newTree } = await octokit.rest.git.createTree({
       owner: GITHUB_OWNER, repo: GITHUB_REPO,
-      base_tree: baseTreeSha, // <-- Usamos el SHA del árbol, no del commit
+      base_tree: baseTreeSha,
       tree: [
         { path: `simuladores/${fileName}`, mode: '100644', content: code },
         { path: 'simuladores/manifest.json', mode: '100644', content: updatedManifestContent }
       ],
     });
 
-    // 5. Crear el nuevo commit
     const { data: newCommit } = await octokit.rest.git.createCommit({
       owner: GITHUB_OWNER, repo: GITHUB_REPO,
       message: `feat: Añadir nuevo simulador '${name}' vía API`,
@@ -62,9 +57,9 @@ module.exports = async (req, res) => {
       parents: [parentCommitSha],
     });
 
-    // 6. Actualizar la rama para que apunte al nuevo commit
     await octokit.rest.git.updateRef({
-      owner: GITHUB_OWNER, repo: GITHUB_REPO,
+      owner: GITHUB_OWNER,
+      repo: GITHUB_REPO,
       ref: `heads/${GITHUB_BRANCH}`,
       sha: newCommit.sha,
     });
