@@ -22,5 +22,13 @@
   {
     "name": "Suma 2 numeros",
     "file": "sumadornumeros.js"
+  },
+  {
+    "name": "Ordenaciones sin repeticion",
+    "file": "ordenaciones.js"
+  },
+  {
+    "name": "Ordenaciones con repeticion",
+    "file": "ordenaciones_repeticion.js"
   }
 ]
