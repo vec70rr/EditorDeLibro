@@ -30,5 +30,21 @@
   {
     "name": "Ordenaciones con repeticion",
     "file": "ordenaciones_repeticion.js"
+  },
+  {
+    "name": "Permutaciones sin repeticion",
+    "file": "permutaciones_sin_repeticion.js"
+  },
+  {
+    "name": "Permutaciones con repeticion",
+    "file": "permutaciones_con_repeticion.js"
+  },
+  {
+    "name": "Permutaciones con grupos de objetos iguales",
+    "file": "permutaciones_grupos_iguales.js"
+  },
+  {
+    "name": "Permutaciones circulares",
+    "file": "permutaciones_circulares.js"
   }
 ]
