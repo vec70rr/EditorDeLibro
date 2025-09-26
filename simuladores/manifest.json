@@ -46,5 +46,9 @@
   {
     "name": "Permutaciones circulares",
     "file": "permutaciones_circulares.js"
+  },
+  {
+    "name": "Combinaciones",
+    "file": "combinaciones.js"
   }
 ]
