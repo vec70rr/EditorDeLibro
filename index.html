@@ -10,16 +10,19 @@
 </head>
 <body>
   <header>
-    <h1>Generador de Libro Interactivo</h1>
-    <div class="sep"></div>
-    <button id="btnGuardarProyecto" title="Guardar el archivo de edición (.json)">Guardar Proyecto</button>
-    <label for="btnCargarProyecto" class="header-button-label" title="Cargar un archivo de edición (.json)">
-      Cargar Proyecto
-      <input type="file" id="btnCargarProyecto" accept=".json,application/json" style="display: none;">
-    </label>
-    <button id="btnDeshacer" disabled type="button">Deshacer</button>
-    <button id="btnDescargar" type="button">Descargar Lector HTML</button>
-  </header>
+  <h1>Generador de Libro Interactivo</h1>
+  <div class="sep"></div>
+  
+  <a href="ayuda.html" target="_blank" class="header-button-link" title="Abrir página de ayuda en una nueva pestaña">Ayuda</a>
+
+  <button id="btnGuardarProyecto" title="Guardar el archivo de edición (.json)">Guardar Proyecto</button>
+  <label for="btnCargarProyecto" class="header-button-label" title="Cargar un archivo de edición (.json)">
+    Cargar Proyecto
+    <input type="file" id="btnCargarProyecto" accept=".json,application/json" style="display: none;">
+  </label>
+  <button id="btnDeshacer" disabled type="button">Deshacer</button>
+  <button id="btnDescargar" type="button">Descargar Lector HTML</button>
+</header>
 
   <div class="layout">
     <aside class="toc">

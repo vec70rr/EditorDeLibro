@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ayuda - Editor de Libros Interactivos</title>
+    <link rel="stylesheet" href="ayuda.css">
+</head>
+<body>
+
+    <header>
+        <h1>Guía de Usuario</h1>
+    </header>
+
+    <main class="container">
+        <section id="uso-editor">
+            <h2>Cómo Usar el Editor de Libros</h2>
+            <p>Esta guía te mostrará las principales funcionalidades del editor de libros.</p>
+
+            <h3>La Interfaz Principal</h3>
+            <p>La interfaz se divide en dos columnas: el <strong>Índice de Contenidos</strong> a la izquierda y el <strong>Área Principal</strong> a la derecha. El índice te permite gestionar la estructura de tu libro, mientras que el área principal muestra los ajustes de apariencia y la vista previa.</p>
+            
+
+            <h3>Gestión de Contenidos</h3>
+            <p>En el panel del índice, puedes añadir nuevas partes a tu libro y gestionar las existentes con los botones de acción:</p>
+            <ul>
+                <li><strong>✏️ (Editar):</strong> Abre la ventana modal para modificar el título y contenido de una sección.</li>
+                <li><strong>🔼 / 🔽 (Mover):</strong> Cambia el orden de las secciones en tu libro.</li>
+                <li><strong>🗑️ (Eliminar):</strong> Borra una sección permanentemente.</li>
+            </ul>
+            
+
+            <h3>Personalización Visual</h3>
+            <p>El panel de "Ajustes de Composición" te permite cambiar la apariencia de la **vista previa y del libro exportado**. Puedes modificar el tamaño de letra, interlineado y los colores de fondo y texto en tiempo real.</p>
+            
+
+            <h3>Guardado y Exportación</h3>
+            <p>Existen dos formas de guardar tu trabajo:</p>
+            <ul>
+                <li><strong>Guardar Proyecto (.json):</strong> Guarda la estructura de tu libro. Es un archivo de texto que contiene todo tu trabajo en un formato editable. <strong>Usa esta opción para guardar tu progreso y poder continuar después.</strong></li>
+                <li><strong>Descargar Lector HTML (.html):</strong> Genera el libro final, visible en cualquier navegador, con todos los estilos y simuladores funcionales. <strong>Usa esta opción para compartir tu libro terminado.</strong></li>
+            </ul>
+        </section>
+
+        <hr>
+
+        <section id="guia-desarrolladores">
+            <h2>Guía para Desarrolladores: Creando un Nuevo Simulador</h2>
+            <p>El proyecto está diseñado para ser fácilmente extensible. Seguir esta guía te permitirá crear nuevos simuladores compatibles.</p>
+
+            <h3>1. Arquitectura Modular</h3>
+            <p>Los simuladores son módulos independientes que son llamados por el editor. Para que el editor reconozca un nuevo simulador, debes hacer dos cosas:</p>
+            <ol>
+                <li>Crear el archivo del simulador (ej. <code>nuevo_sim.js</code>).</li>
+                <li>Añadir el archivo con el botón "Subir Simulador".</li>
+            </ol>
+            
+            <h3>2. Estructura de un Archivo de Simulador</h3>
+            <p>Cada simulador debe exportar un objeto con una función <code>render(params, simName)</code>. Esta función debe devolver una cadena de texto HTML con la estructura completa y auto-contenida del simulador. Aquí tienes una plantilla base:</p>
+            <pre><code>export default {
+  render: (params, simName = 'Mi Simulador') => {
+    const id_base = `sim_${Math.random().toString(36).slice(2)}`;
+
+    return \`
+      &lt;div&gt;
+        &lt;button id="\${id_base}_btn" class="btn-sim" onclick="toggleSim_\${id_base}()"&gt;
+          Abrir \${simName}
+        &lt;/button&gt;
+        &lt;div id="\${id_base}_container" class="simulador-box" style="display:none; margin-top:10px;"&gt;
+          &lt;!-- Aquí va la interfaz de tu simulador (inputs, canvas, etc.) --&gt;
+          &lt;p&gt;Contenido del simulador...&lt;/p&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+      &lt;script&gt;
+        (function() {
+          const id_base = '\${id_base}';
+          const $ = (id) => document.getElementById(id_base + '_' + id);
+
+          window['toggleSim_' + id_base] = function() {
+            const container = $('container');
+            const btn = $('btn');
+            const isHidden = container.style.display === 'none';
+            if (isHidden) {
+              container.style.display = 'block';
+              btn.textContent = 'Ocultar ' + simName;
+              btn.classList.add('btn-sim-rojo');
+              // Llama a tu función principal aquí si es necesario
+            } else {
+              container.style.display = 'none';
+              btn.textContent = 'Abrir ' + simName;
+              btn.classList.remove('btn-sim-rojo');
+            }
+          };
+
+          // Aquí va toda la lógica de tu simulador...
+        })();
+      &lt;/script&gt;
+    \`;
+  }
+};</code></pre>
+
+            <h3>3. Reglas importantes</h3>
+            <ul>
+                <li><strong>IDs Únicos:</strong> Usa siempre el <code>id_base</code> como prefijo para todos los IDs de tus elementos HTML para evitar conflictos.</li>
+                <li><strong>¡NO USAR TEMPLATE LITERALS INTERNOS!:</strong> Dentro del bloque <code>&lt;script&gt;</code>, usa siempre concatenación con <code>' + '</code> para construir strings, nunca comillas <code>` `</code>.</li>
+            </ul>
+        </section>
+
+        <hr>
+
+        <section id="guia-ia">
+            <h2>Guía para No-Programadores: Usando una IA</h2>
+            <p>Puedes pedirle a una IA (como ChatGPT, Gemini, etc.) que programe un simulador por ti. Para asegurar que sea compatible, copia y pega el siguiente prompt y rellena la sección de descripción funcional.</p>
+
+            <h3>El Prompt Universal</h3>
+            <button id="btnCopiarPrompt" class="btn-copy">Copiar Prompt</button>
+            <pre id="promptMaestro"><code>
+Actúa como un desarrollador experto en JavaScript, especializado en la creación de módulos interactivos auto-contenidos para una plataforma educativa.
+
+Tu tarea es generar el código completo para un **único archivo de módulo JavaScript** que funcione dentro de un sistema anfitrión específico. Debes seguir todas las reglas de las siguientes secciones.
+
+---
+### **PARTE 1: DESCRIPCIÓN FUNCIONAL (A rellenar por el usuario)**
+
+* **Nombre del Simulador:** [Escribe aquí el nombre que aparecerá en el menú. Ej: "Multiplicación de 2 Números"]
+* **Descripción Breve:** [Explica en una frase para qué sirve. Ej: "Calcula el producto de dos números y muestra la operación."]
+* **Entradas del Usuario (Inputs):**
+    * **Input 1:**
+        * **Etiqueta:** "Número A:"
+        * **Tipo:** Campo de número (`type=&quot;number&quot;`).
+        * **Valor por defecto:** `3`
+    * **Input 2:**
+        * **Etiqueta:** "Número B:"
+        * **Tipo:** Campo de número (`type=&quot;number&quot;`).
+        * **Valor por defecto:** `4`
+* **Salidas del Simulador (Outputs):**
+    * **Output 1: Fórmula.** Muestra la operación con los valores actuales. Ej: "c = 3 * 4 = 12".
+    * **Output 2: Resultado Principal.** Muestra un texto con el resultado. Ej: "La multiplicación (c=a*b) es: 12".
+* **Lógica/Fórmula Principal:**
+    1.  El usuario introduce dos números, `a` y `b`.
+    2.  El sistema calcula el producto `c = a * b`.
+    3.  El simulador se actualiza en tiempo real cada vez que cambia un valor.
+
+---
+### **PARTE 2: REQUISITOS TÉCNICOS ESTRICTOS (Lógica y Estructura)**
+
+1.  **Estructura del Archivo:**
+    * El código DEBE ser un único módulo JavaScript que exporte un objeto por defecto: `export default { render };`.
+
+2.  **La Función `render`:**
+    * La función `render` DEBE aceptar dos argumentos: `(params, simName)`.
+    * DEBE devolver una única cadena de texto multilínea (template string ` `` `).
+
+3.  **El Bloque `&lt;script&gt;` Encapsulado:**
+    * Toda la lógica DEBE estar dentro de un bloque `&lt;script&gt;` envuelto en una IIFE: `(function() { ... })();`.
+    * DEBES definir un `id_base` único y una función auxiliar `$`.
+    * La función `toggle` DEBE asignarse a `window` con un nombre único: `window['toggleSim_' + id_base] = function() { ... };`.
+
+4.  **¡REGLA CRÍTICA DE SINTAXIS!**
+    * El código JavaScript **DENTRO** del bloque `&lt;script&gt;` **NUNCA DEBE USAR TEMPLATE LITERALS** (` `` `).
+    * **SIEMPRE** DEBE USAR concatenación estándar con comillas simples (`' '`) y el operador `+`.
+
+---
+### **PARTE 3: REQUISITOS DE INTERFAZ Y ESTILO (UI/UX)**
+
+1.  **El Botón Principal (Toggle):**
+    * El botón para mostrar/ocultar DEBE tener la clase `btn-sim`.
+    * El texto inicial del botón DEBE ser `'Abrir ' + simName`.
+
+2.  **El Contenedor del Simulador:**
+    * El `&lt;div&gt;` principal que contiene el simulador DEBE tener la clase `simulador-box`.
+    * DEBE tener el estilo `display:none;` por defecto.
+    * **NUNCA** debe tener estilos en línea de `border`, `padding`, `background-color` o `border-radius`, ya que la clase `simulador-box` se encarga de eso.
+
+3.  **Lógica del Toggle (Comportamiento Exacto):**
+    * Cuando el simulador está oculto, al hacer clic, la función `toggle` DEBE:
+        1.  Mostrar el contenedor (`.style.display = 'block'`).
+        2.  Cambiar el texto del botón a `'Ocultar ' + simName`.
+        3.  **Añadir** la clase `btn-sim-rojo` al botón.
+    * Cuando el simulador está visible, al hacer clic, la función `toggle` DEBE:
+        1.  Ocultar el contenedor (`.style.display = 'none'`).
+        2.  Cambiar el texto del botón de vuelta a `'Abrir ' + simName`.
+        3.  **Quitar** la clase `btn-sim-rojo` del botón.
+
+4.  **Elementos Internos:**
+    * Los botones internos (como "Calcular") deben ser simples `&lt;button&gt;` o tener la clase `btn-sim` si se desea que sean prominentes. No deben tener estilos complejos en línea.
+    * Usa `&lt;label&gt;` para todos los campos de entrada.
+
+---
+**Petición Final:**
+Ahora, basándote en la descripción funcional del usuario en la **Parte 1** y cumpliendo **ESTRICTAMENTE** con todos los requisitos técnicos de la **Parte 2** y de estilo de la **Parte 3**, genera el código completo del módulo JavaScript.
+
+            </code></pre>
+        </section>
+    </main>
+    
+    <script src="ayuda.js"></script>
+</body>
+</html>
