@@ -161,6 +161,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   function applyLiveTypeset() {
+    // Ahora esta función solo se encarga de los estilos que el usuario puede cambiar.
     const css = `
       #vistaPrevia {
         background-color: ${controls.bgColor.value};
@@ -387,77 +388,133 @@ document.addEventListener('DOMContentLoaded', async () => {
   pushHistory();
   renderAll();
 
-  // --- LÓGICA PARA SUBIR SIMULADORES ---
+  // --- LÓGICA PARA SUBIR SIMULADORES (CON PREVISUALIZACIÓN) ---
+// --- LÓGICA PARA SUBIR SIMULADORES (CON PREVISUALIZACIÓN) ---
   const modalUploadBg = document.getElementById('modalUploadBg');
   const btnOpenUpload = document.getElementById('btnOpenUpload');
   const btnCancelUpload = document.getElementById('btnCancelUpload');
   const btnConfirmUpload = document.getElementById('btnConfirmUpload');
+  const btnPreviewSim = document.getElementById('btnPreviewSim');
   const uploadStatus = document.getElementById('uploadStatus');
+  const uploadPreviewArea = document.getElementById('uploadPreviewArea');
+  
+  let validSimulatorCode = null;
 
-  btnOpenUpload.onclick = () => {
-    modalUploadBg.hidden = false;
+  const resetUploadModal = () => {
+    document.getElementById('inpSimName').value = '';
+    document.getElementById('inpSimFile').value = '';
     uploadStatus.textContent = '';
+    uploadPreviewArea.innerHTML = '';
+    btnConfirmUpload.disabled = true;
+    btnPreviewSim.disabled = false;
+    validSimulatorCode = null;
   };
-  btnCancelUpload.onclick = () => modalUploadBg.hidden = true;
 
-  btnConfirmUpload.onclick = async () => {
-    const simNameInput = document.getElementById('inpSimName');
-    const simFileInput = document.getElementById('inpSimFile');
-    const name = simNameInput.value.trim();
-    const file = simFileInput.files[0];
+  btnOpenUpload.addEventListener('click', () => {
+    resetUploadModal();
+    modalUploadBg.hidden = false;
+  });
 
-    if (!name || !file) {
-      uploadStatus.textContent = 'Error: Debes proporcionar un nombre y un archivo.';
+  btnCancelUpload.addEventListener('click', () => {
+    modalUploadBg.hidden = true;
+  });
+
+  btnPreviewSim.addEventListener('click', async () => {
+    const file = document.getElementById('inpSimFile').files[0];
+    if (!file) {
+      uploadStatus.textContent = 'Por favor, selecciona un archivo .js.';
       uploadStatus.style.color = 'red';
       return;
     }
 
-    uploadStatus.textContent = 'Leyendo archivo...';
+    uploadStatus.textContent = 'Cargando y validando...';
     uploadStatus.style.color = 'orange';
+    uploadPreviewArea.innerHTML = '';
+    btnConfirmUpload.disabled = true;
+    validSimulatorCode = null;
 
-    const reader = new FileReader();
-    reader.readAsText(file);
-    reader.onload = async (event) => {
-      const code = event.target.result;
-      
-      uploadStatus.textContent = 'Enviando al servidor... por favor espera.';
-      btnConfirmUpload.disabled = true;
+    const code = await file.text();
+    const dataUrl = 'data:text/javascript;charset=utf-8,' + encodeURIComponent(code);
 
-      try {
-        const response = await fetch('/api/upload-simulator', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            name: name,
-            code: code,
-            fileName: file.name
-          }),
-        });
-
-        const result = await response.json();
-
-        if (!response.ok) {
-          throw new Error(result.message || 'Error desconocido');
-        }
-
-        uploadStatus.textContent = '¡Éxito! El simulador fue añadido. Refresca la página en 1-2 minutos para verlo en el menú.';
-        uploadStatus.style.color = 'green';
-        setTimeout(() => { modalUploadBg.hidden = true; }, 4000);
-
-      } catch (error) {
-        uploadStatus.textContent = `Error: ${error.message}`;
-        uploadStatus.style.color = 'red';
-      } finally {
-        btnConfirmUpload.disabled = false;
-        simNameInput.value = '';
-        simFileInput.value = '';
+    try {
+      const module = await import(dataUrl);
+      if (!module.default || typeof module.default.render !== 'function') {
+        throw new Error("El archivo no exporta un objeto con una función 'render'.");
       }
-    };
 
-    reader.onerror = () => {
-        uploadStatus.textContent = 'Error al leer el archivo.';
-        uploadStatus.style.color = 'red';
-    };
-  };
+      const renderedHTML = module.default.render([], "Vista Previa del Simulador");
+      
+      // --- ¡ESTA ES LA CORRECCIÓN! ---
+      // 1. Separamos el HTML del script
+      const scriptRegex = /<script>([\s\S]*?)<\/script>/;
+      const scriptMatch = renderedHTML.match(scriptRegex);
+      const htmlContent = renderedHTML.replace(scriptRegex, '');
+      const scriptContent = scriptMatch ? scriptMatch[1] : '';
+
+      // 2. Insertamos solo el HTML visible
+      uploadPreviewArea.innerHTML = htmlContent;
+
+      // 3. Creamos y añadimos el script de forma que el navegador lo ejecute
+      if (scriptContent) {
+          const scriptEl = document.createElement('script');
+          scriptEl.textContent = scriptContent;
+          // Al añadirlo al DOM de esta manera, el script se ejecuta
+          document.body.appendChild(scriptEl); 
+          // Lo removemos después de un instante para no ensuciar el DOM principal
+          setTimeout(() => document.body.removeChild(scriptEl), 50);
+      }
+      
+      uploadStatus.textContent = '¡Previsualización exitosa! El simulador es válido.';
+      uploadStatus.style.color = 'green';
+      
+      validSimulatorCode = code;
+      btnConfirmUpload.disabled = false;
+
+    } catch (error) {
+      console.error("Error de previsualización:", error);
+      uploadStatus.textContent = 'Error: El código del simulador tiene un error. Revisa la consola (F12) para más detalles.';
+      uploadStatus.style.color = 'red';
+      uploadPreviewArea.innerHTML = '<p style="color:red; font-family:monospace;">' + error.message + '</p>';
+    }
+  });
+
+  btnConfirmUpload.addEventListener('click', async () => {
+    const simNameInput = document.getElementById('inpSimName');
+    const simFileInput = document.getElementById('inpSimFile');
+    const name = simNameInput.value.trim();
+    const fileName = simFileInput.files[0].name;
+
+    if (!name || !validSimulatorCode) {
+      uploadStatus.textContent = 'Error: Se necesita un nombre y un simulador válido previsualizado.';
+      uploadStatus.style.color = 'red';
+      return;
+    }
+
+    uploadStatus.textContent = 'Enviando al servidor... por favor espera.';
+    btnConfirmUpload.disabled = true;
+    btnPreviewSim.disabled = true;
+
+    try {
+      const response = await fetch('/api/upload-simulator', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name, code: validSimulatorCode, fileName: fileName }),
+      });
+
+      const result = await response.json();
+      if (!response.ok) { throw new Error(result.message || 'Error desconocido del servidor'); }
+
+      uploadStatus.textContent = '¡Éxito! El simulador fue añadido. Refresca la página en 1-2 minutos para verlo en el menú.';
+      uploadStatus.style.color = 'green';
+      setTimeout(() => { modalUploadBg.hidden = true; }, 4000);
+
+    } catch (error) {
+      uploadStatus.textContent = 'Error al subir: ' + error.message;
+      uploadStatus.style.color = 'red';
+      btnConfirmUpload.disabled = false;
+    } finally {
+      btnPreviewSim.disabled = false;
+    }
+  });
 
 });

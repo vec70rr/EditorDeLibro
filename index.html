@@ -100,10 +100,17 @@
         <label for="inpSimFile">Subir archivo (.js):</label>
         <input type="file" id="inpSimFile" accept=".js,text/javascript">
       </div>
-      <div id="uploadStatus" style="font-weight: bold; margin-top: 10px;"></div>
+      
+      <div id="uploadPreviewContainer" style="margin-top: 1rem;">
+        <button id="btnPreviewSim" class="boton-blanco">Previsualizar Simulador</button>
+        <div id="uploadStatus" style="font-weight: bold; margin-top: 10px;"></div>
+        <div id="uploadPreviewArea" style="margin-top: 1rem; border-top: 1px solid #ccc; padding-top: 1rem;">
+          </div>
+      </div>
+
       <div class="buttons">
         <button id="btnCancelUpload">Cancelar</button>
-        <button id="btnConfirmUpload">Subir y Guardar</button>
+        <button id="btnConfirmUpload" disabled>Subir y Guardar</button>
       </div>
     </div>
   </div>
