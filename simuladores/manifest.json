@@ -50,5 +50,9 @@
   {
     "name": "Combinaciones",
     "file": "combinaciones.js"
+  },
+  {
+    "name": "Modelo de penacho Gaussiano",
+    "file": "dispersion_contaminantes.js"
   }
 ]
