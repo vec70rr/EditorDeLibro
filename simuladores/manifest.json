@@ -54,5 +54,9 @@
   {
     "name": "Modelo de penacho Gaussiano",
     "file": "dispersion_contaminantes.js"
+  },
+  {
+    "name": "PrincipioFundamental",
+    "file": "principiofundamental.js"
   }
 ]
