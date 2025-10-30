@@ -62,5 +62,9 @@
   {
     "name": "CombinacionesCap10",
     "file": "combinaciones.js"
+  },
+  {
+    "name": "Ejer10",
+    "file": "ejer4.js"
   }
 ]
