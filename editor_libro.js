@@ -355,6 +355,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       <!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>${pages[0]?.titulo || 'Libro Interactivo'}</title>
       <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"><\/script>
       <script src="https://unpkg.com/mathjs@latest/lib/browser/math.js"><\/script>
+      <script src="https://unpkg.com/vis-data@7.1.4/peer/umd/vis-data.min.js"><\/script>
+      <script src="https://unpkg.com/vis-network@9.1.9/peer/umd/vis-network.min.js"><\/script>
       <style>${styles}</style></head><body>${bodyHTML}</body></html>`;
       
     const blob = new Blob([finalHTML], { type: 'text/html' });
