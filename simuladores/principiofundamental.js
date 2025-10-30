@@ -1,8 +1,6 @@
 export default {
-  render: (params, simName = 'Visualizador de Grafos') => { // Changed default name slightly
+  render: (params, simName = 'Visualizador de Grafos') => {
     const id_base = `sim_${Math.random().toString(36).slice(2)}`;
-
-    // CDN links removed as they are loaded globally now
 
     return `
       <div>
@@ -12,25 +10,18 @@ export default {
 
         <div id="${id_base}_container" class="simulador-box" style="display:none; margin-top:10px;">
           
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
             <div>
               <label for="${id_base}_nodes"><b>Nodos</b> (separados por coma):</label>
-              <textarea id="${id_base}_nodes" style="width: 100%; height: 60px; margin-top: 4px;">A, B, C</textarea>
+              <textarea id="${id_base}_nodes" style="width: 100%; height: 80px; margin-top: 4px;">A, B, C</textarea>
             </div>
             <div>
-              <label for="${id_base}_edges"><b>Caminos</b> (ej. A -> B o A - B):</label>
-              <textarea id="${id_base}_edges" style="width: 100%; height: 60px; margin-top: 4px;">A -> B, A -> B,A -> B, B -> C, B -> C</textarea>
-              <small>Usa '->' para dirigidos, '-' para no dirigidos (o selecciona abajo).</small>
+              <label for="${id_base}_edges"><b>Caminos</b> (Formato: Nodo1 -> Nodo2, N1 - N2, N1 &lt;-> N2):</label>
+              <textarea id="${id_base}_edges" style="width: 100%; height: 80px; margin-top: 4px;">A -> B, A -> B,A -> B, B -> C, B -> C</textarea>
+              <small>'->' dirigido, '-' no dirigido, '&lt;->' bidireccional.</small> 
             </div>
             
-            <div>
-              <label for="${id_base}_edgeType"><b>Tipo de Camino:</b></label>
-              <select id="${id_base}_edgeType" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc; margin-top: 4px;">
-                <option value="directed">Dirigidos (Mostrar Flechas)</option>
-                <option value="undirected" selected>No Dirigidos (Mostrar Líneas)</option>
-              </select>
             </div>
-          </div>
           <button class="btn-sim" id="${id_base}_drawBtn" style="width: 100%;">Dibujar Grafo</button>
 
           <hr style="margin: 1.5rem 0;">
@@ -68,34 +59,42 @@ export default {
               const edgesInput = $('edges').value;
               const edgesArray = edgesInput.split(',').map(s => s.trim()).filter(Boolean);
               
-              // Determinar si usar flechas basado en el dropdown
-              const edgeType = $('edgeType').value;
-              const showArrows = edgeType === 'directed';
+              const edges = new vis.DataSet(edgesArray.map(edgeString => {
+                let fromNode, toNode, separator, arrows;
 
-              const edges = new vis.DataSet(edgesArray.map(edge => {
-                // Permitir '->' o '-' como separador
-                const separator = edge.includes('->') ? '->' : '-';
-                const parts = edge.split(separator);
-                if (parts.length === 2) { 
-                    const edgeData = { from: parts[0].trim(), to: parts[1].trim() };
-                    // **MODIFICACIÓN**: Añadir 'arrows' solo si son dirigidos
-                    if (!showArrows) {
-                        edgeData.arrows = ''; // Vacío significa sin flechas
-                    }
-                    return edgeData;
-                 }
+                // Identificar el separador y extraer nodos
+                if (edgeString.includes('<->')) {
+                  separator = '<->';
+                  arrows = { to: { enabled: true }, from: { enabled: true } }; // Flechas en ambos lados
+                } else if (edgeString.includes('->')) {
+                  separator = '->';
+                  arrows = { to: { enabled: true } }; // Flecha solo al final
+                } else if (edgeString.includes('-')) {
+                  separator = '-';
+                  arrows = undefined; // Sin flechas
+                } else {
+                  console.warn('Separador no reconocido en:', edgeString);
+                  return null; // Ignorar borde mal formado
+                }
+                
+                const parts = edgeString.split(separator);
+                if (parts.length === 2) {
+                  fromNode = parts[0].trim();
+                  toNode = parts[1].trim();
+                  // Crear objeto del borde con la configuración de flechas específica
+                  return { from: fromNode, to: toNode, arrows: arrows };
+                }
                 return null;
-              }).filter(Boolean));
+              }).filter(Boolean)); // Filtrar los nulos si hubo errores de formato
 
               const container = $('network');
               const data = { nodes: nodes, edges: edges };
               
-              // **MODIFICACIÓN**: Ajustar opciones de edges basado en la selección
+              // Opciones: ya no definimos 'arrows' globalmente aquí
               const options = {
                 layout: { hierarchical: false },
-                edges: {
-                  arrows: showArrows ? 'to' : undefined, // 'to' si dirigido, undefined si no dirigido
-                  smooth: { // Mejorar un poco la apariencia
+                edges: { // Opciones generales para todos los bordes
+                  smooth: {
                     enabled: true,
                     type: "dynamic",
                     roundness: 0.5
@@ -112,13 +111,14 @@ export default {
 
             } catch (err) {
               console.error('Error al dibujar el grafo:', err);
-              $('network').innerHTML = '<p style="color:red;padding:10px;">Error al procesar la entrada. Revisa la sintaxis (ej. A -> B o A - B).</p>';
+              $('network').innerHTML = '<p style="color:red;padding:10px;">Error al procesar la entrada. Revisa la sintaxis (ej. A -> B, A - B, A &lt;-> B).</p>';
             }
           }
 
           $('drawBtn').addEventListener('click', drawGraph);
-          // También redibujar si cambia el tipo de borde
-          $('edgeType').addEventListener('change', drawGraph); 
+          // Redibujar también si se editan nodos o caminos
+          $('nodes').addEventListener('input', drawGraph); 
+          $('edges').addEventListener('input', drawGraph); 
 
         })();
       </script>
