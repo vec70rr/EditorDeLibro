@@ -66,5 +66,9 @@
   {
     "name": "Principio-Fundament",
     "file": "principiofundamental.js"
+  },
+  {
+    "name": "CombinacionesCap10",
+    "file": "combinaciones.js"
   }
 ]
