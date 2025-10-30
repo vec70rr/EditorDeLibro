@@ -66,5 +66,9 @@
   {
     "name": "Ejer10",
     "file": "ejer4.js"
+  },
+  {
+    "name": "CombinacionesRepeticion",
+    "file": "combinaciones-repeticion.js"
   }
 ]
