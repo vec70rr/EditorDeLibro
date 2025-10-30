@@ -17,7 +17,7 @@ export default {
             </div>
             <div>
               <label for="${id_base}_edges"><b>Caminos</b> (Formato: Nodo1 -> Nodo2, N1 - N2, N1 &lt;-> N2):</label>
-              <textarea id="${id_base}_edges" style="width: 100%; height: 80px; margin-top: 4px;">A -> B, A -> B,A -> B, B -> C, B -> C</textarea>
+              <textarea id="${id_base}_edges" style="width: 100%; height: 80px; margin-top: 4px;">A - B, A - B,A - B, B - C, B - C</textarea>
               <small>'->' dirigido, '-' no dirigido, '&lt;->' bidireccional.</small> 
             </div>
             
