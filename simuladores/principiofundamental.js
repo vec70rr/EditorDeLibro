@@ -15,19 +15,19 @@ export default {
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
             <div>
               <label for="${id_base}_nodes"><b>Nodos</b> (separados por coma):</label>
-              <textarea id="${id_base}_nodes" style="width: 100%; height: 60px; margin-top: 4px;">A, B, C, D</textarea>
+              <textarea id="${id_base}_nodes" style="width: 100%; height: 60px; margin-top: 4px;">A, B, C</textarea>
             </div>
             <div>
               <label for="${id_base}_edges"><b>Caminos</b> (ej. A -> B o A - B):</label>
-              <textarea id="${id_base}_edges" style="width: 100%; height: 60px; margin-top: 4px;">A -> B, B - C, A -> C, D -> A</textarea>
+              <textarea id="${id_base}_edges" style="width: 100%; height: 60px; margin-top: 4px;">A -> B, A -> B,A -> B, B -> C, B -> C</textarea>
               <small>Usa '->' para dirigidos, '-' para no dirigidos (o selecciona abajo).</small>
             </div>
             
             <div>
               <label for="${id_base}_edgeType"><b>Tipo de Camino:</b></label>
               <select id="${id_base}_edgeType" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc; margin-top: 4px;">
-                <option value="directed" selected>Dirigidos (Mostrar Flechas)</option>
-                <option value="undirected">No Dirigidos (Mostrar Líneas)</option>
+                <option value="directed">Dirigidos (Mostrar Flechas)</option>
+                <option value="undirected" selected>No Dirigidos (Mostrar Líneas)</option>
               </select>
             </div>
           </div>
