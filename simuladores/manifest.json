@@ -106,5 +106,9 @@
   {
     "name": "estadistica-ejercicio-intro",
     "file": "estadistica-ejercicio-intro.js"
+  },
+  {
+    "name": "Simulador_eventos_vehiculos",
+    "file": "ejer_eventos.js"
   }
 ]
