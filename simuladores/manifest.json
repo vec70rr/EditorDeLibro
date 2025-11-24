@@ -90,5 +90,9 @@
   {
     "name": "ejercicio de axiomas",
     "file": "ejer_ axiomas.js"
+  },
+  {
+    "name": "estadistica-clasificador",
+    "file": "estadistica-clasificador.js"
   }
 ]
