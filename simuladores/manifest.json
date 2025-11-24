@@ -94,5 +94,9 @@
   {
     "name": "estadistica-clasificador",
     "file": "estadistica-clasificador.js"
+  },
+  {
+    "name": "estadistica-muestra",
+    "file": "estadistica-muestra.js"
   }
 ]
