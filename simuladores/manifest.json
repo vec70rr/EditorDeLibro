@@ -74,5 +74,9 @@
   {
     "name": "imagen conjuntos",
     "file": "imagen_conjuntos.js"
+  },
+  {
+    "name": "imagen_tres_conjuntos",
+    "file": "imagen_de_3conjuntos.js"
   }
 ]
