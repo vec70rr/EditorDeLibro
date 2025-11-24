@@ -98,5 +98,9 @@
   {
     "name": "estadistica-muestra",
     "file": "estadistica-muestra.js"
+  },
+  {
+    "name": "estadistica-stem",
+    "file": "estadistica-stem.js"
   }
 ]
