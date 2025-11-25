@@ -118,5 +118,9 @@
   {
     "name": "Probabilidad Condicional",
     "file": "sim_condicional.js"
+  },
+  {
+    "name": "Regla de Multiplicación",
+    "file": "sim_multiplicacion.js"
   }
 ]
