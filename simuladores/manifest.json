@@ -130,5 +130,9 @@
   {
     "name": "Problema Cafe",
     "file": "problema_cafe.js"
+  },
+  {
+    "name": "suma",
+    "file": "suma.js"
   }
 ]
