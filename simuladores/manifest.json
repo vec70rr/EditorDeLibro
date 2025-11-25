@@ -110,5 +110,9 @@
   {
     "name": "Simulador_eventos_vehiculos",
     "file": "ejer_eventos.js"
+  },
+  {
+    "name": "simulador_vehiculos",
+    "file": "simulador_eventos.js"
   }
 ]
