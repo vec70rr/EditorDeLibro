@@ -114,5 +114,9 @@
   {
     "name": "simulador_vehiculos",
     "file": "simulador_eventos.js"
+  },
+  {
+    "name": "Probabilidad Condicional",
+    "file": "sim_condicional.js"
   }
 ]
