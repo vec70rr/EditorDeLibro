@@ -126,5 +126,9 @@
   {
     "name": "Teorema de Bayes",
     "file": "sim_bayes.js"
+  },
+  {
+    "name": "Problema Cafe",
+    "file": "problema_cafe.js"
   }
 ]
