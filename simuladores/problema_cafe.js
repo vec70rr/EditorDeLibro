@@ -1,347 +1,236 @@
-// ================================================================
-// Simulador — Problema del Café (Probabilidad Condicional)
-// Estructura idéntica a sim_condicional.js
-// ================================================================
-
 export default {
-  render: (_params, simName = "Simulador: El Problema del Café") => {
-    const id = "sim_" + Math.random().toString(36).slice(2); // id único
+  render: (params, simName = 'Simulador: Preferencias de Café') => {
+    // 1. Generar ID único para esta instancia
+    const id_base = `sim_${Math.random().toString(36).slice(2)}`;
+    
+    // 2. IDs de elementos clave
+    const id_btn_toggle = `${id_base}_btn_toggle`;
+    const id_container = `${id_base}_container`;
+    const id_expl = `${id_base}_expl`;
+    
+    // IDs de celdas de la tabla (para actualizarlas)
+    // Regular
+    const c_rs = `${id_base}_rs`; const c_rm = `${id_base}_rm`; const c_rl = `${id_base}_rl`;
+    // Descafeinado
+    const c_ds = `${id_base}_ds`; const c_dm = `${id_base}_dm`; const c_dl = `${id_base}_dl`;
+    // Totales Fila
+    const t_reg = `${id_base}_treg`; const t_dec = `${id_base}_tdec`;
+    // Totales Columna
+    const t_s = `${id_base}_ts`; const t_m = `${id_base}_tm`; const t_l = `${id_base}_tl`;
+    const t_grand = `${id_base}_grand`;
 
+    // 3. Retornamos el String HTML + Script
     return `
-      <div id="${id}">
-        <button id="${id}_btnToggle" class="btn-sim">
+      <div>
+        <button id="${id_btn_toggle}" class="btn-sim" onclick="window.toggle_${id_base}()">
           Abrir ${simName}
         </button>
 
-        <div id="${id}_container" class="simulador-box" style="display:none; margin-top:10px;">
+        <div id="${id_container}" class="simulador-box" style="display:none; margin-top:10px;">
           <style>
-            #${id}_container {
-              font-family: system-ui, -apple-system, sans-serif;
-              font-size: 14px;
-            }
-            #${id}_container .box {
-              border: 1px solid #e5e7eb;
-              border-radius: 8px;
-              padding: 15px;
-              background: #fff;
-              margin-top: 10px;
-            }
-            #${id}_container .controls {
-              display: flex; gap: 8px; margin-bottom: 15px; flex-wrap: wrap;
-            }
-            #${id}_container button {
-              padding: 6px 12px;
-              border-radius: 6px;
-              cursor: pointer;
-              font-weight: 600;
-              border: 1px solid #d1d5db;
-              background: #f3f4f6;
-              color: #374151;
-            }
-            #${id}_container button.primary {
-              background: #3b82f6; color: white; border: none;
-            }
-            #${id}_container button.primary:hover { background: #2563eb; }
-            #${id}_container button.danger {
-              background: #ef4444; color: white; border: none;
-            }
-            #${id}_container button.danger:hover { background: #dc2626; }
-            
-            /* Tabla */
-            #${id}_container table {
-              width: 100%; border-collapse: collapse; margin: 10px 0; font-variant-numeric: tabular-nums;
-            }
-            #${id}_container th, #${id}_container td {
-              padding: 10px; border: 1px solid #e5e7eb; text-align: center; position: relative; transition: all 0.3s;
-            }
-            #${id}_container th { background: #f9fafb; font-weight: 700; color: #374151; }
-            #${id}_container td { font-size: 1.1em; color: #111; }
-
-            /* Efectos Visuales para la explicación */
-            #${id}_container .dimmed { opacity: 0.2; }
-            #${id}_container .highlight-universe { background: #dbeafe !important; border: 2px solid #3b82f6 !important; color: #1e3a8a; font-weight: bold; }
-            #${id}_container .highlight-target { background: #dcfce7 !important; border: 2px solid #16a34a !important; color: #14532d; font-weight: bold; }
-            
-            #${id}_container .explanation {
-              background: #f8fafc; border-left: 4px solid #3b82f6; padding: 12px; margin-top: 15px; border-radius: 4px; min-height: 80px;
-            }
+            #${id_container} table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 14px; text-align: center; }
+            #${id_container} th { background: #f3f4f6; padding: 8px; border: 1px solid #e5e7eb; }
+            #${id_container} td { padding: 8px; border: 1px solid #e5e7eb; position: relative; }
+            #${id_container} .controls { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 10px; }
+            #${id_container} button { padding: 5px 10px; cursor: pointer; border-radius: 4px; border: 1px solid #ccc; }
+            #${id_container} .highlight { background-color: #dbeafe !important; font-weight: bold; color: #1e40af; }
+            #${id_container} .target { background-color: #dcfce7 !important; font-weight: bold; color: #166534; border: 2px solid #16a34a; }
+            #${id_container} .dim { opacity: 0.3; }
           </style>
 
-          <h3>Simulador — Preferencias de Café</h3>
-          <p style="color:#64748b; margin-bottom:10px;">
-            Simula clientes para visualizar cómo cambia el "universo" en la probabilidad condicional.
-          </p>
+          <p style="color:#666; font-size:0.9em;">Simula clientes para ver la ley de grandes números y probabilidad condicional.</p>
 
-          <div class="box">
-            <div class="controls">
-              <button data-action="gen-100" class="primary">Simular 100</button>
-              <button data-action="gen-1000" class="primary">Simular 1,000</button>
-              <button data-action="reset" class="danger">Reiniciar</button>
+          <div class="controls">
+            <button onclick="window.run_${id_base}(100)" style="background:#3b82f6; color:white; border:none;">Simular 100</button>
+            <button onclick="window.run_${id_base}(1000)" style="background:#3b82f6; color:white; border:none;">Simular 1,000</button>
+            <button onclick="window.reset_${id_base}()" style="background:#ef4444; color:white; border:none;">Reiniciar</button>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Tipo \\ Tamaño</th>
+                <th>Pequeño</th>
+                <th>Mediano</th>
+                <th>Grande</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr id="${id_base}_row_r">
+                <th>Regular</th>
+                <td id="${c_rs}">0</td> <td id="${c_rm}">0</td> <td id="${c_rl}">0</td>
+                <td id="${t_reg}" style="font-weight:bold">0</td>
+              </tr>
+              <tr id="${id_base}_row_d">
+                <th>Descafeinado</th>
+                <td id="${c_ds}">0</td> <td id="${c_dm}">0</td> <td id="${c_dl}">0</td>
+                <td id="${t_dec}" style="font-weight:bold">0</td>
+              </tr>
+              <tr id="${id_base}_row_t" style="background:#f9fafb; font-weight:bold">
+                <th>TOTAL</th>
+                <td id="${t_s}">0</td> <td id="${t_m}">0</td> <td id="${t_l}">0</td>
+                <td id="${t_grand}" style="color:#2563eb">0</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div style="border-top:1px dashed #ccc; padding-top:10px; margin-top:10px;">
+            <strong>Analizar:</strong>
+            <div class="controls" style="margin-top:5px;">
+              <button onclick="window.solve_${id_base}('a')">a) Prob. Simples</button>
+              <button onclick="window.solve_${id_base}('b')">b) Dado Pequeño</button>
+              <button onclick="window.solve_${id_base}('c')">c) Dado Descafeinado</button>
             </div>
-
-            <table id="${id}_table">
-              <thead>
-                <tr>
-                  <th>Tipo \\ Tamaño</th>
-                  <th>Pequeño (S)</th>
-                  <th>Mediano (M)</th>
-                  <th>Grande (L)</th>
-                  <th>TOTAL</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr id="${id}_row_reg">
-                  <th>Regular</th>
-                  <td id="${id}_c_reg_s">0</td>
-                  <td id="${id}_c_reg_m">0</td>
-                  <td id="${id}_c_reg_l">0</td>
-                  <td id="${id}_tot_reg" style="font-weight:bold; color:#6b7280;">0</td>
-                </tr>
-                <tr id="${id}_row_dec">
-                  <th>Descafeinado</th>
-                  <td id="${id}_c_dec_s">0</td>
-                  <td id="${id}_c_dec_m">0</td>
-                  <td id="${id}_c_dec_l">0</td>
-                  <td id="${id}_tot_dec" style="font-weight:bold; color:#6b7280;">0</td>
-                </tr>
-                <tr style="background:#f3f4f6; font-weight:bold;">
-                  <th>TOTAL</th>
-                  <td id="${id}_tot_s">0</td>
-                  <td id="${id}_tot_m">0</td>
-                  <td id="${id}_tot_l">0</td>
-                  <td id="${id}_grand_tot" style="color:#2563eb">0</td>
-                </tr>
-              </tbody>
-            </table>
-
-            <div style="border-top: 1px dashed #e5e7eb; padding-top: 15px; margin-top: 15px;">
-              <strong style="display:block; margin-bottom:10px;">Analizar Escenarios:</strong>
-              <div class="controls">
-                <button data-action="solve-a">a) Prob. Simples</button>
-                <button data-action="solve-b">b) Dado que es Pequeño</button>
-                <button data-action="solve-c">c) Dado que es Descafeinado</button>
-              </div>
-              <div id="${id}_explanation" class="explanation">
-                Genera datos primero para ver la explicación interactiva.
-              </div>
+            <div id="${id_expl}" style="background:#f0f9ff; padding:10px; border-left:4px solid #3b82f6; min-height:60px;">
+              Genera datos primero...
             </div>
           </div>
         </div>
       </div>
 
       <script>
-        (function(){
-          const root = document.getElementById("${id}");
-          if (!root) return;
+        // --- VARIABLES DE ESTADO (Globales únicas para esta instancia) ---
+        // Usamos window['var_' + id] para simular estado persistente sin closures complejos
+        window['counts_${id_base}'] = { rs:0, rm:0, rl:0, ds:0, dm:0, dl:0, total:0 };
 
-          const simName = "${simName}";
-          const container = root.querySelector("#${id}_container");
-          const btnToggle = root.querySelector("#${id}_btnToggle");
+        // 1. ABRIR / CERRAR
+        window.toggle_${id_base} = function() {
+          var box = document.getElementById('${id_container}');
+          var btn = document.getElementById('${id_btn_toggle}');
+          if(box.style.display === 'none') {
+            box.style.display = 'block';
+            btn.textContent = 'Ocultar ${simName}';
+            btn.classList.add('btn-sim-rojo');
+          } else {
+            box.style.display = 'none';
+            btn.textContent = 'Abrir ${simName}';
+            btn.classList.remove('btn-sim-rojo');
+          }
+        };
 
-          if (!container || !btnToggle) return;
-
-          // Helper para seleccionar por ID dinámico
-          const $ = (suffix) => root.querySelector("#${id}_" + suffix);
-
-          // Configuración del problema
-          const PROBS = [
-            { type: 'reg', size: 's', p: 14 },
-            { type: 'reg', size: 'm', p: 20 },
-            { type: 'reg', size: 'l', p: 26 },
-            { type: 'dec', size: 's', p: 20 },
-            { type: 'dec', size: 'm', p: 10 },
-            { type: 'dec', size: 'l', p: 10 }
+        // 2. GENERAR DATOS
+        window.run_${id_base} = function(n) {
+          var state = window['counts_${id_base}'];
+          var probs = [
+            {id:'rs', p:14}, {id:'rm', p:20}, {id:'rl', p:26},
+            {id:'ds', p:20}, {id:'dm', p:10}, {id:'dl', p:10}
           ];
 
-          let state = {
-            counts: { 'reg_s':0, 'reg_m':0, 'reg_l':0, 'dec_s':0, 'dec_m':0, 'dec_l':0 },
-            total: 0
-          };
-
-          let initialized = false;
-
-          btnToggle.addEventListener("click", function(){
-            const hidden = container.style.display === "none" || container.style.display === "";
-            if (hidden) {
-              container.style.display = "block";
-              btnToggle.textContent = "Ocultar " + simName;
-              btnToggle.classList.add("btn-sim-rojo");
-              if (!initialized) {
-                initialized = true;
-                initSim();
+          for(var i=0; i<n; i++) {
+            var r = Math.random() * 100;
+            var sum = 0;
+            for(var j=0; j<probs.length; j++) {
+              sum += probs[j].p;
+              if(r < sum) {
+                state[probs[j].id]++;
+                break;
               }
-            } else {
-              container.style.display = "none";
-              btnToggle.textContent = "Abrir " + simName;
-              btnToggle.classList.remove("btn-sim-rojo");
             }
-          });
-
-          function initSim(){
-            const expl = $("explanation");
-
-            // Función para actualizar la tabla HTML
-            function updateDOM() {
-              // Celdas individuales
-              for(const [key, val] of Object.entries(state.counts)){
-                const cell = $("c_" + key);
-                if(cell) cell.textContent = val;
-              }
-
-              // Totales filas
-              const regTot = state.counts['reg_s'] + state.counts['reg_m'] + state.counts['reg_l'];
-              const decTot = state.counts['dec_s'] + state.counts['dec_m'] + state.counts['dec_l'];
-              
-              // Totales columnas
-              const sTot = state.counts['reg_s'] + state.counts['dec_s'];
-              const mTot = state.counts['reg_m'] + state.counts['dec_m'];
-              const lTot = state.counts['reg_l'] + state.counts['dec_l'];
-
-              $("tot_reg").textContent = regTot;
-              $("tot_dec").textContent = decTot;
-              $("tot_s").textContent = sTot;
-              $("tot_m").textContent = mTot;
-              $("tot_l").textContent = lTot;
-              $("grand_tot").textContent = state.total;
-
-              return { regTot, decTot, sTot, mTot, lTot };
-            }
-
-            // Limpiar estilos visuales (highlight/dim)
-            function clearVisuals() {
-              const cells = container.querySelectorAll('td, th');
-              cells.forEach(c => {
-                c.classList.remove('dimmed', 'highlight-universe', 'highlight-target');
-              });
-            }
-
-            // Delegación de eventos para todos los botones dentro del contenedor
-            container.addEventListener('click', (e) => {
-              const btn = e.target.closest('button[data-action]');
-              if (!btn) return;
-
-              const action = btn.dataset.action;
-
-              // --- GENERACIÓN ---
-              if (action.startsWith('gen-')) {
-                const n = action === 'gen-100' ? 100 : 1000;
-                for(let i=0; i<n; i++){
-                  const r = Math.random() * 100;
-                  let acc = 0;
-                  for(let p of PROBS){
-                    acc += p.p;
-                    if(r < acc){
-                      // Usamos _ en lugar de - para coincidir con las keys del state
-                      state.counts[\`\${p.type}_\${p.size}\`]++;
-                      break;
-                    }
-                  }
-                }
-                state.total += n;
-                updateDOM();
-                clearVisuals();
-                expl.innerHTML = "Simulación actualizada. Total muestras: <b>" + state.total + "</b>.<br>Ahora selecciona una pregunta (a, b o c).";
-              }
-
-              // --- RESET ---
-              if (action === 'reset') {
-                state = { counts: { 'reg_s':0, 'reg_m':0, 'reg_l':0, 'dec_s':0, 'dec_m':0, 'dec_l':0 }, total: 0 };
-                updateDOM();
-                clearVisuals();
-                expl.textContent = "Datos reiniciados.";
-              }
-
-              // --- ANÁLISIS (SOLUCIONES) ---
-              if (action.startsWith('solve-')) {
-                if(state.total === 0) return alert("Primero genera datos.");
-                
-                clearVisuals();
-                const t = updateDOM(); // Obtener totales actuales
-                
-                // Helper para "atenuar todo"
-                const dimAll = () => container.querySelectorAll('td, th').forEach(el => el.classList.add('dimmed'));
-
-                if(action === 'solve-a') {
-                  // A: Probabilidades Simples
-                  $("tot_s").classList.add('highlight-target');
-                  $("tot_dec").classList.add('highlight-target');
-                  
-                  // Remover dim de los headers relevantes para que se vean mejor
-                  // (Opcional, pero se ve mejor si no atenua todo en el inciso A)
-                  
-                  const pS = (t.sTot / state.total).toFixed(3);
-                  const pD = (t.decTot / state.total).toFixed(3);
-
-                  expl.innerHTML = \`
-                    <strong>a) Probabilidades Simples (Marginales)</strong><br>
-                    Se calculan sobre el total global (\${state.total}).<br>
-                    • <b>P(Pequeño):</b> \${t.sTot} / \${state.total} = <b>\${pS}</b> (Teórico ~0.34)<br>
-                    • <b>P(Descafeinado):</b> \${t.decTot} / \${state.total} = <b>\${pD}</b> (Teórico ~0.40)
-                  \`;
-                }
-
-                if(action === 'solve-b') {
-                  // B: P(Decaf | Small) -> Universo: Columna Small
-                  dimAll();
-
-                  // Resaltar Universo (Columna Small)
-                  const colIds = ['c_reg_s', 'c_dec_s', 'tot_s'];
-                  // Headers manuales es dificil sin ID, iluminamos celdas
-                  colIds.forEach(id => {
-                    const el = $(id);
-                    if(el) { el.classList.remove('dimmed'); el.classList.add('highlight-universe'); }
-                  });
-
-                  // Resaltar Target (Intersección: Decaf y Small)
-                  const target = $("c_dec_s");
-                  target.classList.remove('highlight-universe');
-                  target.classList.add('highlight-target');
-
-                  const res = t.sTot > 0 ? (state.counts['dec_s'] / t.sTot).toFixed(3) : 0;
-
-                  expl.innerHTML = \`
-                    <strong>b) P(Descafeinado | Pequeño)</strong><br>
-                    El universo se reduce a la columna "Pequeño".<br>
-                    • <b>Nuevo Total:</b> \${t.sTot} (Tazas pequeñas)<br>
-                    • <b>Favorables:</b> \${state.counts['dec_s']} (Descafeinados dentro de pequeñas)<br>
-                    • <b>Cálculo:</b> \${state.counts['dec_s']} / \${t.sTot} = <b>\${res}</b>
-                  \`;
-                }
-
-                if(action === 'solve-c') {
-                   // C: P(Small | Decaf) -> Universo: Fila Decaf
-                   dimAll();
-
-                   // Resaltar Universo (Fila Decaf)
-                   const rowIds = ['c_dec_s', 'c_dec_m', 'c_dec_l', 'tot_dec'];
-                   $("row_dec").querySelectorAll('th').forEach(th => {
-                      th.classList.remove('dimmed'); th.classList.add('highlight-universe');
-                   });
-                   
-                   rowIds.forEach(id => {
-                     const el = $(id);
-                     if(el) { el.classList.remove('dimmed'); el.classList.add('highlight-universe'); }
-                   });
-
-                   // Resaltar Target (Intersección: Small y Decaf)
-                   const target = $("c_dec_s");
-                   target.classList.remove('highlight-universe');
-                   target.classList.add('highlight-target');
-
-                   const res = t.decTot > 0 ? (state.counts['dec_s'] / t.decTot).toFixed(3) : 0;
-
-                   expl.innerHTML = \`
-                    <strong>c) P(Pequeño | Descafeinado)</strong><br>
-                    El universo se reduce a la fila "Descafeinado".<br>
-                    • <b>Nuevo Total:</b> \${t.decTot} (Total descafeinados)<br>
-                    • <b>Favorables:</b> \${state.counts['dec_s']} (Pequeños dentro de descafeinados)<br>
-                    • <b>Cálculo:</b> \${state.counts['dec_s']} / \${t.decTot} = <b>\${res}</b>
-                  \`;
-                }
-              }
-            });
           }
-        })();
+          state.total += n;
+          window.updateTable_${id_base}();
+          window.clearStyles_${id_base}();
+          document.getElementById('${id_expl}').innerHTML = 'Se agregaron ' + n + ' clientes. Total: <b>' + state.total + '</b>';
+        };
+
+        // 3. REINICIAR
+        window.reset_${id_base} = function() {
+          window['counts_${id_base}'] = { rs:0, rm:0, rl:0, ds:0, dm:0, dl:0, total:0 };
+          window.updateTable_${id_base}();
+          window.clearStyles_${id_base}();
+          document.getElementById('${id_expl}').innerHTML = 'Datos reiniciados.';
+        };
+
+        // 4. ACTUALIZAR DOM
+        window.updateTable_${id_base} = function() {
+          var s = window['counts_${id_base}'];
+          
+          // Celdas
+          document.getElementById('${c_rs}').innerText = s.rs;
+          document.getElementById('${c_rm}').innerText = s.rm;
+          document.getElementById('${c_rl}').innerText = s.rl;
+          document.getElementById('${c_ds}').innerText = s.ds;
+          document.getElementById('${c_dm}').innerText = s.dm;
+          document.getElementById('${c_dl}').innerText = s.dl;
+
+          // Totales
+          var tr = s.rs + s.rm + s.rl;
+          var td = s.ds + s.dm + s.dl;
+          var ts = s.rs + s.ds;
+          var tm = s.rm + s.dm;
+          var tl = s.rl + s.dl;
+
+          document.getElementById('${t_reg}').innerText = tr;
+          document.getElementById('${t_dec}').innerText = td;
+          document.getElementById('${t_s}').innerText = ts;
+          document.getElementById('${t_m}').innerText = tm;
+          document.getElementById('${t_l}').innerText = tl;
+          document.getElementById('${t_grand}').innerText = s.total;
+        };
+
+        // 5. LIMPIAR ESTILOS
+        window.clearStyles_${id_base} = function() {
+           var cells = document.querySelectorAll('#${id_container} td, #${id_container} th');
+           for(var i=0; i<cells.length; i++) {
+             cells[i].classList.remove('dim', 'highlight', 'target');
+           }
+        };
+
+        // 6. RESOLVER PREGUNTAS
+        window.solve_${id_base} = function(mode) {
+           var s = window['counts_${id_base}'];
+           if(s.total === 0) return alert("Genera datos primero");
+           
+           window.clearStyles_${id_base}();
+           var expl = document.getElementById('${id_expl}');
+           
+           // Función helper interna
+           function dimAll() {
+             var cells = document.querySelectorAll('#${id_container} td, #${id_container} th');
+             for(var i=0; i<cells.length; i++) cells[i].classList.add('dim');
+           }
+           function highlight(id, type) {
+             var el = document.getElementById(id);
+             if(el) {
+               el.classList.remove('dim');
+               el.classList.add(type === 'target' ? 'target' : 'highlight');
+             }
+           }
+
+           // --- LÓGICA INCISOS ---
+           if(mode === 'a') {
+             highlight('${t_s}', 'target');
+             highlight('${t_dec}', 'target');
+             var ps = ((s.rs + s.ds) / s.total).toFixed(3);
+             var pd = ((s.ds + s.dm + s.dl) / s.total).toFixed(3);
+             expl.innerHTML = '<b>a) Simples:</b><br>P(Pequeño) = ' + ps + '<br>P(Descafeinado) = ' + pd;
+           }
+           
+           else if(mode === 'b') {
+             dimAll();
+             // Universo: Columna Pequeño
+             highlight('${c_rs}', 'highlight'); highlight('${c_ds}', 'highlight'); highlight('${t_s}', 'highlight');
+             // Intersección
+             highlight('${c_ds}', 'target');
+             
+             var totSmall = s.rs + s.ds;
+             var val = totSmall > 0 ? (s.ds / totSmall).toFixed(3) : 0;
+             expl.innerHTML = '<b>b) P(Desc | Pequeño):</b><br>Universo reducido a columna Pequeño (' + totSmall + ').<br>Resultado: ' + s.ds + ' / ' + totSmall + ' = <b>' + val + '</b>';
+           }
+
+           else if(mode === 'c') {
+             dimAll();
+             // Universo: Fila Descafeinado
+             highlight('${c_ds}', 'highlight'); highlight('${c_dm}', 'highlight'); highlight('${c_dl}', 'highlight'); highlight('${t_dec}', 'highlight');
+             // Intersección
+             highlight('${c_ds}', 'target');
+
+             var totDec = s.ds + s.dm + s.dl;
+             var val = totDec > 0 ? (s.ds / totDec).toFixed(3) : 0;
+             expl.innerHTML = '<b>c) P(Pequeño | Desc):</b><br>Universo reducido a fila Descafeinado (' + totDec + ').<br>Resultado: ' + s.ds + ' / ' + totDec + ' = <b>' + val + '</b>';
+           }
+        };
       </script>
     `;
   }
