@@ -122,5 +122,9 @@
   {
     "name": "Regla de Multiplicación",
     "file": "sim_multiplicacion.js"
+  },
+  {
+    "name": "Teorema de Bayes",
+    "file": "sim_bayes.js"
   }
 ]
