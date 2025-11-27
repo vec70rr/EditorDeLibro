@@ -150,5 +150,9 @@
   {
     "name": "sim_explorador_datos",
     "file": "sim_explorador_datos.js"
+  },
+  {
+    "name": "Ejemplo 29 TDC Domino",
+    "file": "sim_ejer29_dominios.js"
   }
 ]
