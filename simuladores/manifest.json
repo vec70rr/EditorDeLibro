@@ -154,5 +154,9 @@
   {
     "name": "Ejemplo 29 TDC Domino",
     "file": "sim_ejer29_dominios.js"
+  },
+  {
+    "name": "Ejercicio 32 TDC Audio",
+    "file": "Ejer_32_audio.js"
   }
 ]
