@@ -158,5 +158,9 @@
   {
     "name": "Ejercicio 32 TDC Audio",
     "file": "Ejer_32_audio.js"
+  },
+  {
+    "name": "Ejercicio 34 TDC Teclados",
+    "file": "Ejer_34_teclados.js"
   }
 ]
