@@ -142,5 +142,9 @@
   {
     "name": "Problema Café",
     "file": "problema_cafe.js"
+  },
+  {
+    "name": "poblacion-muestra",
+    "file": "ejer_poblaciones_muestras.js"
   }
 ]
