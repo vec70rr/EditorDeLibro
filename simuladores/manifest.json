@@ -146,5 +146,9 @@
   {
     "name": "poblacion-muestra",
     "file": "ejer_poblaciones_muestras.js"
+  },
+  {
+    "name": "sim_explorador_datos",
+    "file": "sim_explorador_datos.js"
   }
 ]
