@@ -178,5 +178,9 @@
   {
     "name": "clasif_estadistica_pmp",
     "file": "clasif_estadistica_pmp.js"
+  },
+  {
+    "name": "explorador_datos_pmp",
+    "file": "explorador_datos_pmp.js"
   }
 ]
