@@ -170,5 +170,9 @@
   {
     "name": "PMP_sim_clasif_estadistica",
     "file": "PMP_sim_clasif_estadistica.js"
+  },
+  {
+    "name": "PMP_sim_explorador_datos",
+    "file": "PMP_sim_explorador_datos.js"
   }
 ]
