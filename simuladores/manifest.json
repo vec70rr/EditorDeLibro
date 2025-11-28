@@ -162,5 +162,9 @@
   {
     "name": "Ejercicio 34 TDC Teclados",
     "file": "Ejer_34_teclados.js"
+  },
+  {
+    "name": "sim_clasif_estadistica",
+    "file": "sim_clasif_estadistica.js"
   }
 ]
