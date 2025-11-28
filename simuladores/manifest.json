@@ -174,5 +174,9 @@
   {
     "name": "PMP_sim_explorador_datos",
     "file": "PMP_sim_explorador_datos.js"
+  },
+  {
+    "name": "clasif_estadistica_pmp",
+    "file": "clasif_estadistica_pmp.js"
   }
 ]
