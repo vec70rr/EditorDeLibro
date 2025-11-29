@@ -182,5 +182,9 @@
   {
     "name": "explorador_datos_pmp",
     "file": "explorador_datos_pmp.js"
+  },
+  {
+    "name": "Media",
+    "file": "simuladorMedia.js"
   }
 ]
