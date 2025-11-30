@@ -186,5 +186,9 @@
   {
     "name": "Media",
     "file": "simuladorMedia.js"
+  },
+  {
+    "name": "ejercicios_pmp",
+    "file": "ejercicios_pmp.js"
   }
 ]
