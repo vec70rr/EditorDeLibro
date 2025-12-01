@@ -190,5 +190,9 @@
   {
     "name": "ejercicios_pmp",
     "file": "ejercicios_pmp.js"
+  },
+  {
+    "name": "axiomas-dados",
+    "file": "axiomas-dados.js"
   }
 ]
