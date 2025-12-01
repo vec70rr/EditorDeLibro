@@ -250,5 +250,9 @@
   {
     "name": "Simulador_Varianza",
     "file": "Simulador_Varianza_n_1.js"
+  },
+  {
+    "name": "Simulador de ejemplo 1.20",
+    "file": "Simulador_ejemplo_1_20.js"
   }
 ]
