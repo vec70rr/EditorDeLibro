@@ -206,5 +206,9 @@
   {
     "name": "Problema Vacacionistas",
     "file": "problema_vacacionistas.js"
+  },
+  {
+    "name": "Problema Refrigeradores",
+    "file": "problema_refrigeradores.js"
   }
 ]

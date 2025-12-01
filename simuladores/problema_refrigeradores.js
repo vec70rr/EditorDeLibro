@@ -1,11 +1,18 @@
 export default {
   render: (params, simName = 'Simulador: Diagrama de Árbol (Refris)') => {
+    // 1. Generar ID único
     const id_base = `sim_tree_${Math.random().toString(36).slice(2)}`;
     
+    // 2. IDs de elementos
     const id_btn_toggle = `${id_base}_btn_toggle`;
     const id_container = `${id_base}_container`;
     const id_expl = `${id_base}_expl`;
+    
+    // IDs de tabla
+    const tbody_id = `${id_base}_tbody`;
+    const total_id = `${id_base}_total`;
 
+    // 3. Retornamos el String HTML + Script (Usando solo var para compatibilidad)
     return `
       <div>
         <button id="${id_btn_toggle}" class="btn-sim" onclick="window.toggle_${id_base}()">
@@ -26,7 +33,7 @@ export default {
 
           <p style="color:#666; font-size:0.9em;">
              <b>A</b>: USA, <b>B</b>: Hielo, <b>C</b>: Garantía.<br>
-             Simula las ramas del árbol paso a paso.
+             A' significa "No A". Se simula la ruta del diagrama de árbol.
           </p>
 
           <div class="controls">
@@ -38,19 +45,19 @@ export default {
           <table>
             <thead>
               <tr>
-                <th>Rama Final</th>
-                <th>A (USA)</th>
-                <th>B (Hielo)</th>
-                <th>C (Garantía)</th>
+                <th>Evento</th>
+                <th>Origen (A)</th>
+                <th>Hielo (B)</th>
+                <th>Garantía (C)</th>
                 <th>Conteo</th>
               </tr>
             </thead>
-            <tbody id="tbody_${id_base}">
+            <tbody id="${tbody_id}">
                </tbody>
              <tfoot>
                <tr style="font-weight:bold; background:#f9fafb;">
                  <td colspan="4" style="text-align:right">TOTAL:</td>
-                 <td id="total_${id_base}">0</td>
+                 <td id="${total_id}">0</td>
                </tr>
             </tfoot>
           </table>
@@ -71,8 +78,8 @@ export default {
       </div>
 
       <script>
-        // --- DEFINICIÓN DE RAMAS DEL ÁRBOL (8 Posibles) ---
-        // A=1 (Si), A=0 (No). Igual para B y C.
+        // --- ESTADO ---
+        // A=1 (Si), A=0 (No). 8 Posibles combinaciones (2x2x2)
         window['branches_${id_base}'] = [
           { id: 'abc',   a:1, b:1, c:1, count:0 },
           { id: 'abc_',  a:1, b:1, c:0, count:0 },
@@ -85,6 +92,7 @@ export default {
         ];
         window['total_${id_base}'] = 0;
 
+        // 1. ABRIR/CERRAR
         window.toggle_${id_base} = function() {
            var box = document.getElementById('${id_container}');
            var btn = document.getElementById('${id_btn_toggle}');
@@ -92,7 +100,7 @@ export default {
              box.style.display = 'block';
              btn.textContent = 'Ocultar ${simName}';
              btn.classList.add('btn-sim-rojo');
-             window.render_${id_base}();
+             window.render_${id_base}(); // Intentar renderizar estado inicial
            } else {
              box.style.display = 'none';
              btn.textContent = 'Abrir ${simName}';
@@ -100,133 +108,174 @@ export default {
            }
         };
 
+        // 2. SIMULAR
         window.run_${id_base} = function(n) {
            var branches = window['branches_${id_base}'];
            
-           // Probabilidades dadas
-           const P_A = 0.75;
-           const P_B_given_A = 0.9; const P_B_given_nA = 0.8;
-           // C conditional
-           const P_C_given_AB = 0.8; const P_C_given_AnB = 0.6;
-           const P_C_given_nAB = 0.7; const P_C_given_nAnB = 0.3;
+           // Probabilidades (Variables VAR para compatibilidad)
+           var P_A = 0.75;
+           
+           // Probabilidades condicionales dadas
+           var P_B_Si_A = 0.9; 
+           var P_B_No_A = 0.8;
+           
+           var P_C_Si_AB = 0.8;   // P(C | A n B)
+           var P_C_Si_AnB = 0.6;  // P(C | A n B')
+           var P_C_Si_nAB = 0.7;  // P(C | A' n B)
+           var P_C_Si_nAnB = 0.3; // P(C | A' n B')
 
-           for(let i=0; i<n; i++) {
-             // Simular A
-             let isA = Math.random() < P_A;
+           for(var i=0; i<n; i++) {
+             // Paso 1: A (USA)
+             var isA = Math.random() < P_A;
              
-             // Simular B (depende de A)
-             let probB = isA ? P_B_given_A : P_B_given_nA;
-             let isB = Math.random() < probB;
+             // Paso 2: B (Hielo), depende de A
+             var probB = isA ? P_B_Si_A : P_B_No_A;
+             var isB = Math.random() < probB;
 
-             // Simular C (depende de A y B)
-             let probC = 0;
-             if (isA && isB) probC = P_C_given_AB;
-             else if (isA && !isB) probC = P_C_given_AnB;
-             else if (!isA && isB) probC = P_C_given_nAB;
-             else probC = P_C_given_nAnB;
+             // Paso 3: C (Garantía), depende de A y B
+             var probC = 0;
+             if (isA && isB) { probC = P_C_Si_AB; }
+             else if (isA && !isB) { probC = P_C_Si_AnB; }
+             else if (!isA && isB) { probC = P_C_Si_nAB; }
+             else { probC = P_C_Si_nAnB; }
              
-             let isC = Math.random() < probC;
+             var isC = Math.random() < probC;
 
-             // Encontrar rama y sumar
-             branches.forEach(b => {
-                if(b.a === (isA?1:0) && b.b === (isB?1:0) && b.c === (isC?1:0)) {
-                  b.count++;
-                }
-             });
+             // Buscar la rama correspondiente y sumar
+             for(var k=0; k<branches.length; k++) {
+               var b = branches[k];
+               var valA = isA ? 1 : 0;
+               var valB = isB ? 1 : 0;
+               var valC = isC ? 1 : 0;
+               
+               if(b.a === valA && b.b === valB && b.c === valC) {
+                 b.count++;
+                 break;
+               }
+             }
            }
            window['total_${id_base}'] += n;
            window.render_${id_base}();
            window.clearStyles_${id_base}();
-           document.getElementById('${id_expl}').innerHTML = 'Simulación completada. Total: ' + window['total_${id_base}'];
+           document.getElementById('${id_expl}').innerHTML = 'Se agregaron ' + n + ' simulaciones. Total: <b>' + window['total_${id_base}'] + '</b>';
         };
 
+        // 3. RENDERIZAR TABLA
         window.render_${id_base} = function() {
            var branches = window['branches_${id_base}'];
            var html = '';
            
-           branches.forEach((b, idx) => {
-             let txtA = b.a ? 'Si' : 'No';
-             let txtB = b.b ? 'Si' : 'No';
-             let txtC = b.c ? 'Si' : 'No';
+           for(var i=0; i<branches.length; i++) {
+             var b = branches[i];
+             var txtA = b.a ? "Si" : "No";
+             var txtB = b.b ? "Si" : "No";
+             var txtC = b.c ? "Si" : "No";
              
-             html += '<tr id="tr_${id_base}_'+idx+'">';
-             html += '<td>' + (b.a?'A':'A\'') + (b.b?'B':'B\'') + (b.c?'C':'C\'') + '</td>';
+             // Notación matemática A, A'
+             var math = (b.a?"A":"A'") + (b.b?"B":"B'") + (b.c?"C":"C'");
+
+             html += '<tr id="tr_${id_base}_'+i+'">';
+             html += '<td>' + math + '</td>';
              html += '<td>' + txtA + '</td><td>' + txtB + '</td><td>' + txtC + '</td>';
              html += '<td style="font-weight:bold">' + b.count + '</td>';
              html += '</tr>';
-           });
+           }
 
-           document.getElementById('tbody_${id_base}').innerHTML = html;
-           document.getElementById('total_${id_base}').innerText = window['total_${id_base}'];
+           document.getElementById('${tbody_id}').innerHTML = html;
+           document.getElementById('${total_id}').innerText = window['total_${id_base}'];
         };
 
+        // 4. REINICIAR
         window.reset_${id_base} = function() {
-           window['branches_${id_base}'].forEach(b => b.count = 0);
+           var branches = window['branches_${id_base}'];
+           for(var i=0; i<branches.length; i++) {
+             branches[i].count = 0;
+           }
            window['total_${id_base}'] = 0;
            window.render_${id_base}();
            window.clearStyles_${id_base}();
-           document.getElementById('${id_expl}').innerHTML = 'Reiniciado.';
+           document.getElementById('${id_expl}').innerHTML = 'Datos reiniciados.';
         };
 
+        // 5. LIMPIAR ESTILOS
         window.clearStyles_${id_base} = function() {
-           var rows = document.querySelectorAll('#tbody_${id_base} tr');
-           rows.forEach(r => r.classList.remove('dim', 'highlight', 'target'));
+           var rows = document.querySelectorAll('#${tbody_id} tr');
+           for(var i=0; i<rows.length; i++) {
+             rows[i].classList.remove('dim', 'highlight', 'target');
+           }
         };
 
+        // 6. RESOLVER INCISOS
         window.solve_${id_base} = function(q) {
-           if(window['total_${id_base}'] === 0) return alert("Simula primero");
+           var totalSim = window['total_${id_base}'];
+           if(totalSim === 0) return alert("Genera datos primero");
+           
            window.clearStyles_${id_base}();
            var branches = window['branches_${id_base}'];
            var expl = document.getElementById('${id_expl}');
-           var totalSim = window['total_${id_base}'];
 
            var countTarget = 0;
-           var countUniverse = 0; // Para condicionales
+           var countUniverse = 0;
 
-           // Helper
-           function check(conditionUniverse, conditionTarget) {
-              branches.forEach((b, idx) => {
-                 var row = document.getElementById('tr_${id_base}_'+idx);
-                 if(conditionUniverse(b)) {
-                    countUniverse += b.count;
-                    if(conditionTarget(b)) {
-                       countTarget += b.count;
-                       row.classList.add('target');
-                    } else {
-                       row.classList.add('highlight');
-                    }
+           // Iteramos ramas manualmente (estilo var antiguo)
+           for(var i=0; i<branches.length; i++) {
+              var b = branches[i];
+              var row = document.getElementById('tr_${id_base}_'+i);
+              var inUniverse = false;
+              var inTarget = false;
+
+              // Lógica de conjuntos según la pregunta
+              if(q === 'b') { // P(A n B n C)
+                inUniverse = true; // Todo el espacio muestral
+                if(b.a===1 && b.b===1 && b.c===1) inTarget = true;
+              }
+              else if(q === 'c') { // P(B n C)
+                inUniverse = true;
+                if(b.b===1 && b.c===1) inTarget = true;
+              }
+              else if(q === 'd') { // P(C)
+                inUniverse = true;
+                if(b.c===1) inTarget = true;
+              }
+              else if(q === 'e') { // P(A | B n C)
+                // Universo restringido: Solo B y C
+                if(b.b===1 && b.c===1) {
+                  inUniverse = true;
+                  if(b.a===1) inTarget = true;
+                }
+              }
+
+              // Aplicar estilos y cuentas
+              if(inUniverse) {
+                 countUniverse += b.count;
+                 if(inTarget) {
+                    countTarget += b.count;
+                    row.classList.add('target');
                  } else {
-                    row.classList.add('dim');
+                    row.classList.add('highlight');
                  }
-              });
+              } else {
+                 row.classList.add('dim');
+              }
            }
 
+           // Mostrar textos
+           var prob = 0;
            if(q === 'b') {
-             // P(A n B n C) -> Solo la rama ABC
-             check(b => true, b => b.a==1 && b.b==1 && b.c==1); // Universo es todo
-             var prob = (countTarget / totalSim).toFixed(4);
-             expl.innerHTML = '<b>b) P(A ∩ B ∩ C)</b><br>Clientes en la rama ABC: ' + countTarget + '<br>Probabilidad: ' + countTarget + '/' + totalSim + ' = <b>' + prob + '</b>';
+             prob = (countTarget / totalSim).toFixed(4);
+             expl.innerHTML = '<b>b) P(A ∩ B ∩ C)</b><br>Rama exacta A-B-C: ' + countTarget + '<br>Prob = ' + countTarget + '/' + totalSim + ' = <b>' + prob + '</b>';
            }
-
-           if(q === 'c') {
-             // P(B n C) -> Ramas ABC y A'BC
-             check(b => true, b => b.b==1 && b.c==1);
-             var prob = (countTarget / totalSim).toFixed(4);
-             expl.innerHTML = '<b>c) P(B ∩ C)</b><br>Clientes con Hielo y Garantía (ABC + A\'BC): ' + countTarget + '<br>Probabilidad: ' + countTarget + '/' + totalSim + ' = <b>' + prob + '</b>';
+           else if(q === 'c') {
+             prob = (countTarget / totalSim).toFixed(4);
+             expl.innerHTML = '<b>c) P(B ∩ C)</b><br>Ramas con Hielo y Garantía: ' + countTarget + '<br>Prob = ' + countTarget + '/' + totalSim + ' = <b>' + prob + '</b>';
            }
-
-           if(q === 'd') {
-             // P(C) -> Todas las ramas terminadas en C
-             check(b => true, b => b.c==1);
-             var prob = (countTarget / totalSim).toFixed(4);
-             expl.innerHTML = '<b>d) P(C)</b><br>Clientes con Garantía (cualquier rama): ' + countTarget + '<br>Probabilidad: ' + countTarget + '/' + totalSim + ' = <b>' + prob + '</b>';
+           else if(q === 'd') {
+             prob = (countTarget / totalSim).toFixed(4);
+             expl.innerHTML = '<b>d) P(C)</b><br>Cualquier rama con Garantía: ' + countTarget + '<br>Prob = ' + countTarget + '/' + totalSim + ' = <b>' + prob + '</b>';
            }
-
-           if(q === 'e') {
-             // P(A | B n C) -> Universo: B y C. Objetivo: A
-             check(b => b.b==1 && b.c==1, b => b.a==1);
-             var prob = countUniverse > 0 ? (countTarget / countUniverse).toFixed(4) : 0;
-             expl.innerHTML = '<b>e) P(A | B ∩ C)</b><br>Universo (Tienen Hielo y Garantía): ' + countUniverse + '<br>De esos, son USA (A): ' + countTarget + '<br>Resultado: ' + countTarget + '/' + countUniverse + ' = <b>' + prob + '</b>';
+           else if(q === 'e') {
+             prob = countUniverse > 0 ? (countTarget / countUniverse).toFixed(4) : 0;
+             expl.innerHTML = '<b>e) P(A | B ∩ C)</b><br>Dado que tiene Hielo y Garantía (Total: ' + countUniverse + ')<br>¿Cuántos son de USA (A)? ' + countTarget + '<br>Resultado = ' + countTarget + '/' + countUniverse + ' = <b>' + prob + '</b>';
            }
         };
       </script>
