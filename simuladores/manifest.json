@@ -262,5 +262,9 @@
   {
     "name": "Comparación múltiple",
     "file": "Comparación_multiple_Boxplots.js"
+  },
+  {
+    "name": "Comparación de dos muestras",
+    "file": "Comparación_2_muestras.js"
   }
 ]
