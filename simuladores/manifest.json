@@ -242,5 +242,9 @@
   {
     "name": "EspacioMuestral4",
     "file": "espacio_muestral_4.js"
+  },
+  {
+    "name": "Simulador_muestra_simple",
+    "file": "simulador_muestra_simple.js"
   }
 ]
