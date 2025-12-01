@@ -254,5 +254,9 @@
   {
     "name": "Simulador de ejemplo 1.20",
     "file": "Simulador_ejemplo_1_20.js"
+  },
+  {
+    "name": "Diagrama de Caja",
+    "file": "Diagrama_de_caja.js"
   }
 ]
