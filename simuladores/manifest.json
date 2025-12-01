@@ -210,5 +210,9 @@
   {
     "name": "Problema Refrigeradores",
     "file": "problema_refrigeradores.js"
+  },
+  {
+    "name": "axiomas-clientes",
+    "file": "axiomas-clientes.js"
   }
 ]
