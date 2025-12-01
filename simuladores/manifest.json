@@ -214,5 +214,9 @@
   {
     "name": "axiomas-clientes",
     "file": "axiomas-clientes.js"
+  },
+  {
+    "name": "EspaciosMuestrales1",
+    "file": "espacio_muestral_1.1.js"
   }
 ]
