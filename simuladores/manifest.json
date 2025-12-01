@@ -218,5 +218,9 @@
   {
     "name": "EspaciosMuestrales1",
     "file": "espacio_muestral_1.1.js"
+  },
+  {
+    "name": "EspacioMuestral1",
+    "file": "espacio_muestral_1.js"
   }
 ]
