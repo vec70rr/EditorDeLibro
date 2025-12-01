@@ -194,5 +194,9 @@
   {
     "name": "axiomas-dados",
     "file": "axiomas-dados.js"
+  },
+  {
+    "name": "axiomas-clientes",
+    "file": "axiomas-clientes.js"
   }
 ]
