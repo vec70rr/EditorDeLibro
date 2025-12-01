@@ -246,5 +246,9 @@
   {
     "name": "Simulador_muestra_simple",
     "file": "simulador_muestra_simple.js"
+  },
+  {
+    "name": "Simulador_Varianza",
+    "file": "Simulador_Varianza_n_1.js"
   }
 ]
