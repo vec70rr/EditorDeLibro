@@ -367,6 +367,45 @@ document.addEventListener('DOMContentLoaded', async () => {
     URL.revokeObjectURL(a.href);
   }
 
+  // --- LÓGICA PARA EL BOTÓN DE IMAGEN YA EXISTENTE ---
+  const btnImagen = document.getElementById('btnImagen');
+  const inpImagen = document.getElementById('inpImagen'); // El que acabamos de añadir
+  
+  if (btnImagen && inpImagen) {
+    // 1. Conectar el clic del botón visual con el input oculto
+    btnImagen.addEventListener('click', (e) => {
+      e.preventDefault(); 
+      inpImagen.click();
+    });
+
+    // 2. Procesar la imagen cuando se selecciona
+    inpImagen.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      if (!file.type.startsWith('image/')) {
+        alert('Por favor, selecciona un archivo de imagen válido.');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (readerEvent) => {
+        const base64String = readerEvent.target.result;
+        // Creamos el HTML de la imagen con estilos responsive
+        const imgHTML = `<img src="${base64String}" alt="Imagen" style="display:block; max-width: 100%; height: auto; margin: 10px auto; border-radius: 4px;">\n`;
+        
+        // Usamos tu función existente 'insertAtCursor'
+        insertAtCursor(inpContenido, imgHTML);
+        
+        // Opcional: Si quieres ver el cambio al instante en la vista previa
+        // podrías llamar a saveEditor() o similar, pero como estás editando
+        // basta con que aparezca el código en el textarea.
+      };
+      reader.readAsDataURL(file);
+      e.target.value = ''; // Limpiar para permitir re-subir
+    });
+  }
+
   // --- INICIALIZACIÓN ---
   document.getElementById('btnDeshacer').onclick = undo;
   document.getElementById('btnGuardar').onclick = saveEditor;
