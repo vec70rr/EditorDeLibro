@@ -290,5 +290,9 @@
   {
     "name": "combinacion_con_repeticion",
     "file": "combinaciones_repeticion_tecnicas.js"
+  },
+  {
+    "name": "tecnicas_de_conteo10",
+    "file": "tecnicas_de_conteo10.js"
   }
 ]
