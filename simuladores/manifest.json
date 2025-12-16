@@ -286,5 +286,9 @@
   {
     "name": "combinaciones_repeticion_tecnicas",
     "file": "combinaciones_repeticion_tecnicas.js"
+  },
+  {
+    "name": "combinacion_con_repeticion",
+    "file": "combinaciones_repeticion_tecnicas.js"
   }
 ]
