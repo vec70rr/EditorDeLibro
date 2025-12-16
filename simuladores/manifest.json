@@ -282,5 +282,9 @@
   {
     "name": "combinaciones_tecnicas",
     "file": "combinaciones_repeticion_tecnicas.js"
+  },
+  {
+    "name": "combinaciones_repeticion_tecnicas",
+    "file": "combinaciones_repeticion_tecnicas.js"
   }
 ]
