@@ -270,5 +270,9 @@
   {
     "name": "combinaciones_10tecnicas",
     "file": "combinaciones_10tecnicas.js"
+  },
+  {
+    "name": "combinaciones_repeticion_11tecnicas",
+    "file": "combinaciones_repeticion_11tecnicas.js"
   }
 ]
