@@ -266,5 +266,9 @@
   {
     "name": "Comparación de dos muestras",
     "file": "Comparación_2_muestras.js"
+  },
+  {
+    "name": "combinaciones_10tecnicas",
+    "file": "combinaciones_10tecnicas.js"
   }
 ]
