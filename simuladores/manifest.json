@@ -274,5 +274,9 @@
   {
     "name": "combinaciones_repeticion_11tecnicas",
     "file": "combinaciones_repeticion_11tecnicas.js"
+  },
+  {
+    "name": "pascal_12tecnicas",
+    "file": "pascal_12tecnicas.js"
   }
 ]
