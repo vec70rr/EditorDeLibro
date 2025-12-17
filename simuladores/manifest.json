@@ -350,5 +350,9 @@
   {
     "name": "eventos_1",
     "file": "eventos_1.js"
+  },
+  {
+    "name": "eventos_2",
+    "file": "eventos_2.js"
   }
 ]
