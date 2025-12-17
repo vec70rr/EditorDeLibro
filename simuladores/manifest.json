@@ -362,5 +362,9 @@
   {
     "name": "Permutaciones Agrupadas",
     "file": "permutaciones_agrupadas.js"
+  },
+  {
+    "name": "14-EjerciciosTC",
+    "file": "14-EjerciciosTC.js"
   }
 ]
