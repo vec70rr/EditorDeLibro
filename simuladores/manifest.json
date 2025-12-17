@@ -346,5 +346,9 @@
   {
     "name": "Simulador Varianza",
     "file": "simulador_varianza_n_1.js"
+  },
+  {
+    "name": "eventos_1",
+    "file": "eventos_1.js"
   }
 ]
