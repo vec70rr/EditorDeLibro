@@ -330,5 +330,9 @@
   {
     "name": "Comparación Múltiple",
     "file": "comparacion_multiple_boxplots.js"
+  },
+  {
+    "name": "Diagrama de Caja",
+    "file": "diagrama_de_caja.js"
   }
 ]
