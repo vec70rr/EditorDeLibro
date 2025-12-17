@@ -370,5 +370,9 @@
   {
     "name": "Ejemplo Independencia",
     "file": "sim_independencia.js"
+  },
+  {
+    "name": "Ejemplo Eventos Mutuamente Excluyentes",
+    "file": "sim_excluyentes.js"
   }
 ]
