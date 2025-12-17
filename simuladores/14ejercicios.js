@@ -1,12 +1,12 @@
 export default {
+  
   render: function(params, simName = "Ejercicios") => {
-    const id_base = 'sim_conteo_' + Math.random().toString(36).substr(2, 9);
-    const title   = simName || 'Ejercicios de técnicas de conteo';
+    const id_base = `sim_${Math.random().toString(36).slice(2)}`;
 
     return `
       <div class="simulador-wrapper">
         <button id="btn_toggle_${id_base}" class="btn-sim" onclick="window['toggleSim_${id_base}']()">
-          Abrir ${title}
+          Abrir ${simName}
         </button>
 
         <div id="sim_box_${id_base}" class="simulador-box" style="display:none; margin-top:10px;">
@@ -19,7 +19,7 @@ export default {
                   Sección de ejercicios de técnicas de conteo
                 </div>
                 <h3 style="margin:2px 0 0;font-size:19px;font-weight:700;color:#111827;">
-                  ${title}
+                  ${simName}
                 </h3>
               </div>
               <div style="width:44px;height:44px;border-radius:999px;background:radial-gradient(circle at 30% 20%,#60a5fa,#22c55e);box-shadow:0 0 24px rgba(96,165,250,0.75);"></div>
@@ -150,7 +150,7 @@ export default {
       <script>
       (function() {
         var id   = '${id_base}';
-        var name = '${title}';
+        var name = '${simName}';
 
         window['toggleSim_' + id] = function() {
           var box = document.getElementById('sim_box_' + id);
