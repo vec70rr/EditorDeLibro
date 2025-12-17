@@ -316,11 +316,11 @@
     "file": "simulador_diagrama_arbol.js"
   },
   {
-    "name": "Ejercicio_Permutaciones con repeticion",
+    "name": "Ejercicio_PermutacionesConRepeticion",
     "file": "Ejercicio_permutacionesConRepeticion.js"
   },
   {
-    "name": "Ejercicio_Permutaciones con grupos iguales",
+    "name": "Ejercicio_PermutacionesGruposIguales",
     "file": "Ejercicio_permutacioneGruposIguales.js"
   }
 ]
