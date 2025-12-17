@@ -354,5 +354,9 @@
   {
     "name": "eventos_2",
     "file": "eventos_2.js"
+  },
+  {
+    "name": "Permutaciones Agrupadas",
+    "file": "Permutaciones Agrupadas.js"
   }
 ]
