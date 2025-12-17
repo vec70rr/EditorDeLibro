@@ -338,5 +338,9 @@
   {
     "name": "Simulador ejemplo 1.20",
     "file": "simulador_ejemplo_1_20.js"
+  },
+  {
+    "name": "Simulador Muestra",
+    "file": "simulador_muestra_simple.js"
   }
 ]
