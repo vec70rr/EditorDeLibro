@@ -2,7 +2,7 @@ export default{
   render: (params, simName = 'Permutaciones iguales') => {
     var safeName = (typeof simName === 'string' && simName.trim()) ? simName.trim() : 'Simulador';
 
-    // id_base ÚNICO (fuera del <script> para poder usarlo en ids del HTML)
+    // id_base ÚNICO (fuera del <script> para poder usarlo en ids del HTML )
     const id_base = `sim_${Math.random().toString(36).slice(2)}`;
 
     return `
