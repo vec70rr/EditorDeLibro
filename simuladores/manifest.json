@@ -366,5 +366,9 @@
   {
     "name": "14-EjerciciosTC",
     "file": "14-EjerciciosTC.js"
+  },
+  {
+    "name": "14Ejercicios",
+    "file": "14Ejercicios.js"
   }
 ]
