@@ -374,5 +374,9 @@
   {
     "name": "Ejemplo Eventos Mutuamente Excluyentes",
     "file": "sim_excluyentes.js"
+  },
+  {
+    "name": "Dominios TDC",
+    "file": "ejer29_dominios.js"
   }
 ]
