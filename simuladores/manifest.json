@@ -318,5 +318,9 @@
   {
     "name": "Ejercicio_Permutaciones con repeticion",
     "file": "Ejercicio_permutacionesConRepeticion.js"
+  },
+  {
+    "name": "Ejercicio_Permutaciones con grupos iguales",
+    "file": "Ejercicio_permutacioneGruposIguales.js"
   }
 ]
