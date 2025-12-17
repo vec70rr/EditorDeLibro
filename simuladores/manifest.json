@@ -358,5 +358,9 @@
   {
     "name": "Permutaciones Agrupadas",
     "file": "Permutaciones Agrupadas.js"
+  },
+  {
+    "name": "Permutaciones Agrupadas",
+    "file": "permutaciones_agrupadas.js"
   }
 ]
