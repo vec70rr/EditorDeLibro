@@ -362,8 +362,13 @@
   {
     "name": "Permutaciones Agrupadas",
     "file": "permutaciones_agrupadas.js"
-  },{
+  },
+  {
     "name": "14 Ejercicios",
     "file": "14ejercicios.js"
+  },
+  {
+    "name": "Ejemplo Independencia",
+    "file": "sim_independencia.js"
   }
 ]
