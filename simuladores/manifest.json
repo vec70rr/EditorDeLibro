@@ -326,5 +326,9 @@
   {
     "name": "Comparación de 2 muestras",
     "file": "comparacion_2_muestras.js"
+  },
+  {
+    "name": "Comparación Múltiple",
+    "file": "comparacion_multiple_boxplots.js"
   }
 ]
