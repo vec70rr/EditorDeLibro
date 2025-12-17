@@ -322,5 +322,25 @@
   {
     "name": "Ejercicio_PermutacionesGruposIguales",
     "file": "Ejercicio_permutacioneGruposIguales.js"
+  },
+  {
+    "name": "Comparación de 2 muestras",
+    "file": "comparacion_2_muestras.js"
+  },
+  {
+    "name": "Comparación Múltiple",
+    "file": "comparacion_multiple_boxplots.js"
+  },
+  {
+    "name": "Diagrama de Caja",
+    "file": "diagrama_de_caja.js"
+  },
+  {
+    "name": "Simulador ejemplo 1.20",
+    "file": "simulador_ejemplo_1_20.js"
+  },
+  {
+    "name": "Simulador Muestra",
+    "file": "simulador_muestra_simple.js"
   }
 ]
