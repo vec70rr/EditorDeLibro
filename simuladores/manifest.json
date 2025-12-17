@@ -322,5 +322,9 @@
   {
     "name": "Ejercicio_PermutacionesGruposIguales",
     "file": "Ejercicio_permutacioneGruposIguales.js"
+  },
+  {
+    "name": "Comparación de 2 muestras",
+    "file": "comparacion_2_muestras.js"
   }
 ]
