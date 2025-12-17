@@ -314,5 +314,9 @@
   {
     "name": "Simulador Diagrama de Árbol",
     "file": "simulador_diagrama_arbol.js"
+  },
+  {
+    "name": "Ejercicio_Permutaciones con repeticion",
+    "file": "Ejercicio_permutacionesConRepeticion.js"
   }
 ]
