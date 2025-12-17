@@ -378,5 +378,9 @@
   {
     "name": "Dominios TDC",
     "file": "ejer29_dominios.js"
+  },
+  {
+    "name": "Ejemplo Audio TDC",
+    "file": "ejer_32_audio.js"
   }
 ]
