@@ -310,5 +310,9 @@
   {
     "name": "Simulador de Triángulo de Pascal",
     "file": "simulador_triangulo_pascal.js"
+  },
+  {
+    "name": "Simulador Diagrama de Árbol",
+    "file": "simulador_diagrama_arbol.js"
   }
 ]
