@@ -382,5 +382,9 @@
   {
     "name": "Ejemplo Audio TDC",
     "file": "ejer_32_audio.js"
+  },
+  {
+    "name": "Teclados",
+    "file": "ejer_34_teclados.js"
   }
 ]
