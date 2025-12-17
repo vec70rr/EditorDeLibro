@@ -1,6 +1,6 @@
 export default {
-  
-  render: function(params, simName = "Ejercicios") => {
+
+  render: (params, simName = "14 Ejercicios") => {
     const id_base = `sim_${Math.random().toString(36).slice(2)}`;
 
     return `
