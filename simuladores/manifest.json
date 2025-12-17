@@ -298,5 +298,9 @@
   {
     "name": "tecnicas_de_conteo11",
     "file": "tecnicas_de_conteo11.js"
+  },
+  {
+    "name": "Simulador Triangulo de Pascal",
+    "file": "Simulador_Triangulo_Pascal.js"
   }
 ]
