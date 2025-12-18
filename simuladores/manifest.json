@@ -386,5 +386,9 @@
   {
     "name": "Teclados",
     "file": "ejer_34_teclados.js"
+  },
+  {
+    "name": "ejercicioscap14",
+    "file": "ejercicioscap14.js"
   }
 ]
